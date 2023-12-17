@@ -118,17 +118,26 @@ class PatientAdmin(admin.ModelAdmin):
 @admin.register(models.UZIImage)
 class UZIImageAdmin(admin.ModelAdmin):
     actions = [download_all_slides, download_human_slides]
-    list_display = ('pk', '__str__', 'patient_card', 'uzi_device', 'human_edited',)
+    list_display = ('pk', 'get_medworker', 'get_patient', 'uzi_device', 'human_edited',)
     
     def get_queryset(self, request):
         return super().get_queryset(
             request
-        ).prefetch_related('uzi_device','image__segments')
+        ).prefetch_related('uzi_device','image__segments', 'patient_card', 'patient_card__patient', 'patient_card__med_worker')
     
     def human_edited(self, obj):
         return obj.image.segments.filter(is_ai=False).exists()
+
+    def get_medworker(self, obj):
+        return obj.patient_card.med_worker.get_full_name()
+    def get_patient(self, obj):
+        return obj.patient_card.patient.get_full_name()
+    
+    
     human_edited.allow_tags = True
     human_edited.short_description = 'Было отредактировано врачом?'
+    get_medworker.short_description = 'Лечащий врач'
+    get_patient.short_description = 'Пациент'
 
 @admin.register(models.PatientCard)
 class PatientCardAdmin(admin.ModelAdmin):
