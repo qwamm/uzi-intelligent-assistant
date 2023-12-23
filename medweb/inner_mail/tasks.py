@@ -5,7 +5,6 @@ from pathlib import Path
 from django.conf import settings
 
 
-
 # @shared_task
 # def send_email(email_id: MedEmail, email_creator_key='base'):
 #   email_creator = EMAIL_CREATORS[email_creator_key]

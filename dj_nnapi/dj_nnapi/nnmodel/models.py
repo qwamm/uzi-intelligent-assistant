@@ -10,79 +10,64 @@ class OriginalImage(models.Model):
     image = models.CharField(max_length=100)
 
     class Meta:
-        verbose_name="Снимок оригинала"
+        verbose_name = "Снимок оригинала"
         verbose_name_plural = "Снимки оригиналов"
         managed = False
         db_table = "medml_originalimage"
 
 
 class UZISegmentGroupInfo(models.Model):
+    details = models.JSONField(null=True)
 
-  details = models.JSONField(
-    null=True
-  )
+    is_ai = models.BooleanField(default=False)
 
-  is_ai = models.BooleanField(
-    default=False
-  )
+    original_image = models.ForeignKey(
+        OriginalImage, models.CASCADE, related_name="segments"
+    )
 
-  original_image = models.ForeignKey(
-    OriginalImage,
-    models.CASCADE,
-    related_name='segments'
-  )
+    #   uzi_image = models.ForeignKey(
+    #     'MedmlUziimage',
+    #     on_delete=models.CASCADE
+    #   )
 
-#   uzi_image = models.ForeignKey(
-#     'MedmlUziimage',
-#     on_delete=models.CASCADE
-#   )
+    class Meta:
+        managed = False
+        verbose_name = "Информация о группе сегментов"
+        verbose_name_plural = "Информация о группе сегментов"
+        db_table = "nnmodel_uzisegmentgroupinfo"
 
-  class Meta:
-    managed = False
-    verbose_name="Информация о группе сегментов"
-    verbose_name_plural = "Информация о группе сегментов"
-    db_table = "nnmodel_uzisegmentgroupinfo"
 
 class SegmentationData(models.Model):
+    details = models.JSONField(null=True)
 
-  details = models.JSONField(
-    null=True
-  )
+    segment_group = models.ForeignKey(
+        UZISegmentGroupInfo, models.CASCADE, related_name="data"
+    )
 
-  segment_group = models.ForeignKey(
-      UZISegmentGroupInfo,
-      models.CASCADE,
-      related_name='data',
-  )
-
-  class Meta:
-    verbose_name="Сегмент"
-    verbose_name_plural = "Сегменты"
-    managed = False
-    db_table = "nnmodel_segmentationdata"
+    class Meta:
+        verbose_name = "Сегмент"
+        verbose_name_plural = "Сегменты"
+        managed = False
+        db_table = "nnmodel_segmentationdata"
 
 
 class SegmentationPoint(models.Model):
+    uid = models.BigIntegerField()
 
-  uid = models.BigIntegerField(
-  )
+    segment = models.ForeignKey(
+        SegmentationData, on_delete=models.CASCADE, related_name="points"
+    )
 
-  segment = models.ForeignKey(
-    SegmentationData,
-    on_delete=models.CASCADE,
-    related_name='points',
-  )
+    x = models.PositiveIntegerField()
+    y = models.PositiveIntegerField()
+    z = models.PositiveIntegerField(default=0)
 
-  x = models.PositiveIntegerField()
-  y = models.PositiveIntegerField()
-  z = models.PositiveIntegerField(default=0)
-
-  class Meta:
-    managed = False
-    db_table = "nnmodel_segmentationpoint"
-    verbose_name="Точка сегмента"
-    verbose_name_plural = "Точки сегментов"
-    unique_together = (['uid', 'segment'],)
+    class Meta:
+        managed = False
+        db_table = "nnmodel_segmentationpoint"
+        verbose_name = "Точка сегмента"
+        verbose_name_plural = "Точки сегментов"
+        unique_together = (["uid", "segment"],)
 
 
 class AuthGroup(models.Model):
@@ -90,29 +75,29 @@ class AuthGroup(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'auth_group'
+        db_table = "auth_group"
 
 
 class AuthGroupPermissions(models.Model):
     id = models.BigAutoField(primary_key=True)
     group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
-    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
+    permission = models.ForeignKey("AuthPermission", models.DO_NOTHING)
 
     class Meta:
         managed = False
-        db_table = 'auth_group_permissions'
-        unique_together = (('group', 'permission'),)
+        db_table = "auth_group_permissions"
+        unique_together = (("group", "permission"),)
 
 
 class AuthPermission(models.Model):
     name = models.CharField(max_length=255)
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
+    content_type = models.ForeignKey("DjangoContentType", models.DO_NOTHING)
     codename = models.CharField(max_length=100)
 
     class Meta:
         managed = False
-        db_table = 'auth_permission'
-        unique_together = (('content_type', 'codename'),)
+        db_table = "auth_permission"
+        unique_together = (("content_type", "codename"),)
 
 
 class DjangoAdminLog(models.Model):
@@ -121,12 +106,14 @@ class DjangoAdminLog(models.Model):
     object_repr = models.CharField(max_length=200)
     action_flag = models.SmallIntegerField()
     change_message = models.TextField()
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
-    user = models.ForeignKey('MedmlMedworker', models.DO_NOTHING)
+    content_type = models.ForeignKey(
+        "DjangoContentType", models.DO_NOTHING, blank=True, null=True
+    )
+    user = models.ForeignKey("MedmlMedworker", models.DO_NOTHING)
 
     class Meta:
         managed = False
-        db_table = 'django_admin_log'
+        db_table = "django_admin_log"
 
 
 class DjangoContentType(models.Model):
@@ -135,8 +122,8 @@ class DjangoContentType(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'django_content_type'
-        unique_together = (('app_label', 'model'),)
+        db_table = "django_content_type"
+        unique_together = (("app_label", "model"),)
 
 
 class DjangoMigrations(models.Model):
@@ -147,7 +134,7 @@ class DjangoMigrations(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'django_migrations'
+        db_table = "django_migrations"
 
 
 class DjangoSession(models.Model):
@@ -157,7 +144,7 @@ class DjangoSession(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'django_session'
+        db_table = "django_session"
 
 
 class InnerMailMaildetails(models.Model):
@@ -168,19 +155,23 @@ class InnerMailMaildetails(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'inner_mail_maildetails'
+        db_table = "inner_mail_maildetails"
 
 
 class InnerMailNotification(models.Model):
     id = models.BigAutoField(primary_key=True)
     create_date = models.DateTimeField()
     details = models.ForeignKey(InnerMailMaildetails, models.DO_NOTHING)
-    notification_author = models.ForeignKey('MedmlMedworker', models.DO_NOTHING)
-    notification_group = models.ForeignKey('InnerMailNotificationgroup', models.DO_NOTHING)
+    notification_author = models.ForeignKey(
+        "MedmlMedworker", models.DO_NOTHING
+    )
+    notification_group = models.ForeignKey(
+        "InnerMailNotificationgroup", models.DO_NOTHING
+    )
 
     class Meta:
         managed = False
-        db_table = 'inner_mail_notification'
+        db_table = "inner_mail_notification"
 
 
 class InnerMailNotificationdynamics(models.Model):
@@ -188,34 +179,38 @@ class InnerMailNotificationdynamics(models.Model):
     status = models.IntegerField()
     update_date = models.DateTimeField()
     mail = models.ForeignKey(InnerMailNotification, models.DO_NOTHING)
-    user = models.ForeignKey('MedmlMedworker', models.DO_NOTHING)
+    user = models.ForeignKey("MedmlMedworker", models.DO_NOTHING)
 
     class Meta:
         managed = False
-        db_table = 'inner_mail_notificationdynamics'
-        unique_together = (('mail', 'status', 'user'),)
+        db_table = "inner_mail_notificationdynamics"
+        unique_together = (("mail", "status", "user"),)
 
 
 class InnerMailNotificationgroup(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=512)
     create_date = models.DateTimeField()
-    uzi_patient_card = models.ForeignKey('MedmlPatientcard', models.DO_NOTHING, blank=True, null=True)
+    uzi_patient_card = models.ForeignKey(
+        "MedmlPatientcard", models.DO_NOTHING, blank=True, null=True
+    )
 
     class Meta:
         managed = False
-        db_table = 'inner_mail_notificationgroup'
+        db_table = "inner_mail_notificationgroup"
 
 
 class InnerMailNotificationgroupMembers(models.Model):
     id = models.BigAutoField(primary_key=True)
-    notificationgroup = models.ForeignKey(InnerMailNotificationgroup, models.DO_NOTHING)
-    medworker = models.ForeignKey('MedmlMedworker', models.DO_NOTHING)
+    notificationgroup = models.ForeignKey(
+        InnerMailNotificationgroup, models.DO_NOTHING
+    )
+    medworker = models.ForeignKey("MedmlMedworker", models.DO_NOTHING)
 
     class Meta:
         managed = False
-        db_table = 'inner_mail_notificationgroup_members'
-        unique_together = (('notificationgroup', 'medworker'),)
+        db_table = "inner_mail_notificationgroup_members"
+        unique_together = (("notificationgroup", "medworker"),)
 
 
 class MedmlMedworker(models.Model):
@@ -237,7 +232,7 @@ class MedmlMedworker(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'medml_medworker'
+        db_table = "medml_medworker"
 
 
 class MedmlMedworkerGroups(models.Model):
@@ -247,8 +242,8 @@ class MedmlMedworkerGroups(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'medml_medworker_groups'
-        unique_together = (('medworker', 'group'),)
+        db_table = "medml_medworker_groups"
+        unique_together = (("medworker", "group"),)
 
 
 class MedmlMedworkerUserPermissions(models.Model):
@@ -258,8 +253,8 @@ class MedmlMedworkerUserPermissions(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'medml_medworker_user_permissions'
-        unique_together = (('medworker', 'permission'),)
+        db_table = "medml_medworker_user_permissions"
+        unique_together = (("medworker", "permission"),)
 
 
 class MedmlMlmodel(models.Model):
@@ -271,7 +266,7 @@ class MedmlMlmodel(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'medml_mlmodel'
+        db_table = "medml_mlmodel"
 
 
 class MedmlPatient(models.Model):
@@ -285,7 +280,7 @@ class MedmlPatient(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'medml_patient'
+        db_table = "medml_patient"
 
 
 class MedmlPatientcard(models.Model):
@@ -293,12 +288,16 @@ class MedmlPatientcard(models.Model):
     acceptance_datetime = models.DateTimeField()
     has_nodules = models.CharField(max_length=128)
     diagnosis = models.TextField()
-    med_worker = models.ForeignKey(MedmlMedworker, models.DO_NOTHING, blank=True, null=True)
-    patient = models.ForeignKey(MedmlPatient, models.DO_NOTHING, blank=True, null=True)
+    med_worker = models.ForeignKey(
+        MedmlMedworker, models.DO_NOTHING, blank=True, null=True
+    )
+    patient = models.ForeignKey(
+        MedmlPatient, models.DO_NOTHING, blank=True, null=True
+    )
 
     class Meta:
         managed = False
-        db_table = 'medml_patientcard'
+        db_table = "medml_patientcard"
 
 
 class MedmlUzidevice(models.Model):
@@ -307,7 +306,7 @@ class MedmlUzidevice(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'medml_uzidevice'
+        db_table = "medml_uzidevice"
 
 
 class MedmlUziimage(models.Model):
@@ -317,15 +316,22 @@ class MedmlUziimage(models.Model):
     sharpness = models.FloatField()
     image_count = models.IntegerField()
     details = models.JSONField()
-    image = models.OneToOneField(OriginalImage, models.DO_NOTHING, blank=True, null=True,related_name='uzi_image')
-    diagnos_date = models.DateTimeField(
-        auto_now=True
+    image = models.OneToOneField(
+        OriginalImage,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="uzi_image",
     )
+    diagnos_date = models.DateTimeField(auto_now=True)
 
-    patient_card = models.ForeignKey(MedmlPatientcard, models.DO_NOTHING, blank=True, null=True)
-    uzi_device = models.ForeignKey(MedmlUzidevice, models.DO_NOTHING, blank=True, null=True)
+    patient_card = models.ForeignKey(
+        MedmlPatientcard, models.DO_NOTHING, blank=True, null=True
+    )
+    uzi_device = models.ForeignKey(
+        MedmlUzidevice, models.DO_NOTHING, blank=True, null=True
+    )
 
     class Meta:
         managed = False
-        db_table = 'medml_uziimage'
-
+        db_table = "medml_uziimage"

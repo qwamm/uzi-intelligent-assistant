@@ -54,7 +54,7 @@ def download_slides(modeladmin, request, queryset, **extra):
         with ZipFile(tmp, "w", ZIP_DEFLATED) as uzi_zip:
             with uzi_zip.open("segments.json", "w") as json_file:
                 json_data = json.dumps(segs.data, ensure_ascii=False)
-                json_file.write(json_data.encode('utf-8'))
+                json_file.write(json_data.encode("utf-8"))
             for group in groups:
                 with uzi_zip.open(group.original_path, "w") as img_out:
                     with group.original_image.image.file.open("rb") as img_inp:
@@ -68,9 +68,11 @@ def download_slides(modeladmin, request, queryset, **extra):
         ] = f'attachment; filename="{zip_hash}.zip"'
         return response
 
+
 @admin.action(description="Скачать снимки")
 def download_all_slides(modeladmin, request, queryset):
     return download_slides(modeladmin, request, queryset)
+
 
 @admin.action(description="Скачать отредактированные снимки")
 def download_human_slides(modeladmin, request, queryset):
@@ -82,9 +84,15 @@ class MedWorkerAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name", "fathers_name")}),
-        ("Медицинская организация", {"fields": ("med_organization","job")}),
-        ("Экспертная информация", {"fields": ("is_remote_worker","expert_details")}),
+        (
+            _("Personal info"),
+            {"fields": ("first_name", "last_name", "fathers_name")},
+        ),
+        ("Медицинская организация", {"fields": ("med_organization", "job")}),
+        (
+            "Экспертная информация",
+            {"fields": ("is_remote_worker", "expert_details")},
+        ),
         (
             _("Permissions"),
             {
@@ -100,12 +108,23 @@ class MedWorkerAdmin(BaseUserAdmin):
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
-        (None, {"classes": ("wide",), "fields": ("email", "password1", "password2")}),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2"),
+            },
+        ),
     )
-    list_display = ("email", "first_name", "last_name", "fathers_name", "is_staff")
+    list_display = (
+        "email",
+        "first_name",
+        "last_name",
+        "fathers_name",
+        "is_staff",
+    )
     search_fields = ("email", "first_name", "last_name", "fathers_name")
     ordering = ("email",)
-
 
 
 admin.site.register(models.MedWorker, MedWorkerAdmin)
@@ -115,56 +134,76 @@ admin.site.register(models.MedWorker, MedWorkerAdmin)
 class PatientAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(models.UZIImage)
 class UZIImageAdmin(admin.ModelAdmin):
     actions = [download_all_slides, download_human_slides]
-    list_display = ('pk', 'get_medworker', 'get_patient', 'uzi_device', 'human_edited',)
-    
+    list_display = (
+        "pk",
+        "get_medworker",
+        "get_patient",
+        "uzi_device",
+        "human_edited",
+    )
+
     def get_queryset(self, request):
-        return super().get_queryset(
-            request
-        ).prefetch_related('uzi_device','image__segments', 'patient_card', 'patient_card__patient', 'patient_card__med_worker')
-    
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                "uzi_device",
+                "image__segments",
+                "patient_card",
+                "patient_card__patient",
+                "patient_card__med_worker",
+            )
+        )
+
     def human_edited(self, obj):
         return obj.image.segments.filter(is_ai=False).exists()
 
     def get_medworker(self, obj):
         return obj.patient_card.med_worker.get_full_name()
+
     def get_patient(self, obj):
         return obj.patient_card.patient.get_full_name()
-    
-    
+
     human_edited.allow_tags = True
-    human_edited.short_description = 'Было отредактировано врачом?'
-    get_medworker.short_description = 'Лечащий врач'
-    get_patient.short_description = 'Пациент'
+    human_edited.short_description = "Было отредактировано врачом?"
+    get_medworker.short_description = "Лечащий врач"
+    get_patient.short_description = "Пациент"
+
 
 @admin.register(models.PatientCard)
 class PatientCardAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(models.UZIDevice)
 class UZIDeviceAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(models.OriginalImage)
 class OriginalImageAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(models.SegmentationData)
 class SegmentationDataAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(models.SegmentationPoint)
 class SegmentationPointAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(models.MLModel)
 class MLModelAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(models.UZISegmentGroupInfo)
 class UZISegmentGroupInfoAdmin(admin.ModelAdmin):
     pass
-
-

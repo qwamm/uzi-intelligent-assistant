@@ -15,16 +15,27 @@ from django.conf import settings
 
 
 class SegmentationModel(ModelABC):
-    def __init__(self, model_type: str, projection_type:str='full', model_pre_loader:ModelPreLoaderABC=ZipModelPreLoader) -> None:
+    def __init__(
+        self,
+        model_type: str,
+        projection_type: str = "full",
+        model_pre_loader: ModelPreLoaderABC = ZipModelPreLoader,
+    ) -> None:
         self._base_clear()
         self.img_type = None
         self.model_type = model_type
         self.projection_type = projection_type
-        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        
-        print(f'Device: {self.device}')
+        self.device = (
+            torch.device("cuda")
+            if torch.cuda.is_available()
+            else torch.device("cpu")
+        )
+
+        print(f"Device: {self.device}")
         self.pre_loader = model_pre_loader(model_type, projection_type)
-        base_dir = self.pre_loader.load(settings.NN_SETTINGS['segmentation'][self.projection_type])
+        base_dir = self.pre_loader.load(
+            settings.NN_SETTINGS["segmentation"][self.projection_type]
+        )
         self.load(base_dir)
 
     def _base_clear(self):
@@ -40,18 +51,22 @@ class SegmentationModel(ModelABC):
 
     def load(self, path: str) -> None:
         path2 = Path(path)
-        weight_c1 = path2 / 'deeplabv3plus.pkl'
+        weight_c1 = path2 / "deeplabv3plus.pkl"
         self._model = smp.DeepLabV3Plus(
-            encoder_name="efficientnet-b6", encoder_weights=None, in_channels=1, classes=1)
+            encoder_name="efficientnet-b6",
+            encoder_weights=None,
+            in_channels=1,
+            classes=1,
+        )
         self._model.to(self.device)
-        self._model.load_state_dict(torch.load(
-            weight_c1, map_location=self.device))
+        self._model.load_state_dict(
+            torch.load(weight_c1, map_location=self.device)
+        )
         self._model.eval()
-
 
     @staticmethod
     def preprocessing(img: object) -> object:
-        img = Image.fromarray(img).convert(mode='L')
+        img = Image.fromarray(img).convert(mode="L")
         Transform = T.Compose([T.ToTensor()])
         img_tensor = Transform(img)
         img_dtype = img_tensor.dtype
@@ -71,8 +86,12 @@ class SegmentationModel(ModelABC):
         else:
             value_x = np.mean(img, 1)
             value_y = np.mean(img, 0)
-            x_hold_range = list((len(value_x) * np.array([0.24 / 3, 2.2 / 3])).astype(np.int64))
-            y_hold_range = list((len(value_y) * np.array([0.8 / 3, 1.8 / 3])).astype(np.int64))
+            x_hold_range = list(
+                (len(value_x) * np.array([0.24 / 3, 2.2 / 3])).astype(np.int64)
+            )
+            y_hold_range = list(
+                (len(value_y) * np.array([0.8 / 3, 1.8 / 3])).astype(np.int64)
+            )
             value_thresold = 5
             x_cut = np.argwhere((value_x <= value_thresold) == True)
             x_cut_min = list(x_cut[x_cut <= x_hold_range[0]])
@@ -96,20 +115,31 @@ class SegmentationModel(ModelABC):
                 y_cut_max = min(y_cut_max)
             else:
                 y_cut_max = or_shape[1]
-        cut_image = img_array_fromtensor[x_cut_min:x_cut_max,
-                                         y_cut_min:y_cut_max]
+        cut_image = img_array_fromtensor[
+            x_cut_min:x_cut_max, y_cut_min:y_cut_max
+        ]
         cut_image_orshape = cut_image.shape
         cut_image = resize(cut_image, (256, 256), order=3)
         cut_image_tensor = torch.tensor(data=cut_image, dtype=img_dtype)
-        return [cut_image_tensor, cut_image_orshape, or_shape, [x_cut_min, x_cut_max, y_cut_min, y_cut_max]]
+        return [
+            cut_image_tensor,
+            cut_image_orshape,
+            or_shape,
+            [x_cut_min, x_cut_max, y_cut_min, y_cut_max],
+        ]
 
     @staticmethod
     def get_connect_components(bw_img: object) -> list:
         if np.sum(bw_img) == 0:
             return []
-        labeled_img, num = sklabel(bw_img, connectivity=1, background=0, return_num=True)
+        labeled_img, num = sklabel(
+            bw_img, connectivity=1, background=0, return_num=True
+        )
         # print(f'Segmented areas: {num}')
-        return [[(labeled_img == i + 1).astype(np.float32), None] for i in range(num)]
+        return [
+            [(labeled_img == i + 1).astype(np.float32), None]
+            for i in range(num)
+        ]
 
     @staticmethod
     def preprocessing2(roi: object) -> list:
@@ -154,18 +184,20 @@ class SegmentationModel(ModelABC):
         FN = ((1 - SR) + GT == 2).astype(np.float32)
         IoU = float(np.sum(TP)) / (float(np.sum(TP + FP + FN)) + 1e-6)
         return IoU
-    
+
     def find_same_indices(self, indices, ii=0) -> list:
         if ii >= len(indices) - 1:
             return indices
         for i in range(ii + 1, len(indices)):
             if set(indices[i]) & set(indices[ii]):
-                indices[ii] = sorted(list(set(indices.pop(i)) | set(indices[ii])))
+                indices[ii] = sorted(
+                    list(set(indices.pop(i)) | set(indices[ii]))
+                )
                 return self.find_same_indices(indices, ii)
         return self.find_same_indices(indices, ii + 1)
-    
+
     def track_nodules(self, iou_threshold, occurrence_threshold) -> list:
-        print('Tracking nodules...')
+        print("Tracking nodules...")
         used_indices_dict = {}
         used_indices_list = []
         same_indices = []
@@ -184,7 +216,9 @@ class SegmentationModel(ModelABC):
             for c in range(len(self.nodules[i])):
                 current_indices = []
                 for p in range(len(self.nodules[i - 1])):
-                    iou = self.get_iou(self.nodules[i - 1][p][0], self.nodules[i][c][0])
+                    iou = self.get_iou(
+                        self.nodules[i - 1][p][0], self.nodules[i][c][0]
+                    )
                     if iou >= iou_threshold:
                         current_indices.append(self.nodules[i - 1][p][1])
 
@@ -205,7 +239,7 @@ class SegmentationModel(ModelABC):
                     used_indices_list.append(new_index)
 
         same_indices = self.find_same_indices(same_indices)
-         
+
         new_indices = {}
         for ind in used_indices_list:
             new_indices[ind] = ind
@@ -217,7 +251,7 @@ class SegmentationModel(ModelABC):
                 new_indices[ind] = min_ind
             for ind in lst:
                 used_indices_dict[ind] = new_sum
-        
+
         for ind in new_indices:
             if used_indices_dict[ind] >= occurrence_threshold:
                 self.unique_indices.append(new_indices[ind])
@@ -230,7 +264,7 @@ class SegmentationModel(ModelABC):
                 if new_ind in self.unique_indices:
                     im_nodules.append([nd[0], new_ind])
             self.selected_nodules.append(im_nodules)
-        print(f'Tracked {len(self.unique_indices)} nodule(s)')
+        print(f"Tracked {len(self.unique_indices)} nodule(s)")
 
         return self.selected_nodules
 
@@ -238,34 +272,49 @@ class SegmentationModel(ModelABC):
         self._base_clear()
         bi = 0
         tif_length = len(images)
-        
+
         with torch.no_grad():
             for index, im in enumerate(images):
                 with torch.no_grad():
-                    img, cut_image_orshape, or_shape, location = self.preprocessing(im)
+                    (
+                        img,
+                        cut_image_orshape,
+                        or_shape,
+                        location,
+                    ) = self.preprocessing(im)
                     self.img_type = img.dtype
                     img = torch.unsqueeze(img, 0)
                     img = torch.unsqueeze(img, 0)
                     img = img.to(self.device)
                     img_array = (torch.squeeze(img)).data.cpu().numpy()
-                    self.images_features.append([img_array, cut_image_orshape, or_shape, location])
+                    self.images_features.append(
+                        [img_array, cut_image_orshape, or_shape, location]
+                    )
 
                     with torch.no_grad():
                         mask_c1 = self._model(img)
                         mask_c1 = torch.sigmoid(mask_c1)
-                        mask_c1_array = (torch.squeeze(mask_c1)).data.cpu().numpy()
-                        mask_c1_array = (mask_c1_array > 0.5)
+                        mask_c1_array = (
+                            (torch.squeeze(mask_c1)).data.cpu().numpy()
+                        )
+                        mask_c1_array = mask_c1_array > 0.5
                         mask_c1_array = mask_c1_array.astype(np.float32)
-                        current_nodules = self.get_connect_components(mask_c1_array.astype(np.int64))
+                        current_nodules = self.get_connect_components(
+                            mask_c1_array.astype(np.int64)
+                        )
                         self.nodules.append(current_nodules)
 
         if tif_length == 1:
             self.selected_nodules = self.nodules
         elif tif_length > 1:
-            self.selected_nodules = self.track_nodules(iou_threshold=0.2, occurrence_threshold=tif_length/5)
+            self.selected_nodules = self.track_nodules(
+                iou_threshold=0.2, occurrence_threshold=tif_length / 5
+            )
 
         seg_nodules = []
-        for index, (nodules, features) in enumerate(zip(self.selected_nodules, self.images_features)):
+        for index, (nodules, features) in enumerate(
+            zip(self.selected_nodules, self.images_features)
+        ):
             # Убрал координаты, добавил одномерный массив со всеми сегментами, типом, и индексом
             img_array = features[0]
             cut_image_orshape = features[1]
@@ -278,18 +327,28 @@ class SegmentationModel(ModelABC):
             for node in nodules:
                 nd = node[0].astype(np.int64)
                 mask_array = mask_array + nd.astype(np.float32)
-                mask_array = np.where(mask_array > 0, 1., 0.).astype(np.float32)
+                mask_array = np.where(mask_array > 0, 1.0, 0.0).astype(
+                    np.float32
+                )
 
-                dim1_cut_min, dim1_cut_max, dim2_cut_min, dim2_cut_max = self.preprocessing2(nd)
-                img_array_roi = img_array[dim1_cut_min:dim1_cut_max, dim2_cut_min:dim2_cut_max]
+                (
+                    dim1_cut_min,
+                    dim1_cut_max,
+                    dim2_cut_min,
+                    dim2_cut_max,
+                ) = self.preprocessing2(nd)
+                img_array_roi = img_array[
+                    dim1_cut_min:dim1_cut_max, dim2_cut_min:dim2_cut_max
+                ]
                 new_nodules.append([img_array_roi, node[1]])
 
                 n1_array = nd.astype(np.float32)
                 f1_mask = np.zeros(shape=or_shape, dtype=np.float32)
                 n1_array = resize(n1_array, cut_image_orshape, order=1)
-                f1_mask[location[0]:location[1],
-                        location[2]:location[3]] = n1_array
-                f1_mask = (f1_mask > 0.5)
+                f1_mask[
+                    location[0] : location[1], location[2] : location[3]
+                ] = n1_array
+                f1_mask = f1_mask > 0.5
                 f1_mask = f1_mask.astype(np.uint8) * 255
                 seg_nodules.append((f1_mask, node[1], index))
                 # cs = self.get_bbox(f1_mask)
@@ -300,12 +359,13 @@ class SegmentationModel(ModelABC):
 
             final_mask = np.zeros(shape=or_shape, dtype=np.float32)
             mask_array = resize(mask_array, cut_image_orshape, order=1)
-            final_mask[location[0]:location[1],
-                        location[2]:location[3]] = mask_array
-            final_mask = (final_mask > 0.5)
+            final_mask[
+                location[0] : location[1], location[2] : location[3]
+            ] = mask_array
+            final_mask = final_mask > 0.5
             final_mask = np.where(final_mask > 0, 255, 0).astype(np.uint8)
             self.result_masks.append(final_mask)
-        print('seg Done!')
+        print("seg Done!")
         # self.save_result()
         # return self.result_masks
         return seg_nodules
@@ -317,13 +377,18 @@ class SegmentationModel(ModelABC):
         image_path = '<folder>/<filename>.<extension>'
         """
         import imageio, pickle
-        file_name = 'aaa'
-        extension = 'tiff'
-        result_path = settings.MEDIA_ROOT_PATH /f'{file_name}_result.{extension}'
+
+        file_name = "aaa"
+        extension = "tiff"
+        result_path = (
+            settings.MEDIA_ROOT_PATH / f"{file_name}_result.{extension}"
+        )
         if len(self.result_masks) > 1:
             imageio.mimwrite(result_path, np.array(self.result_masks))
-        with open(settings.MEDIA_ROOT_PATH /f'{file_name}_rois.pkl', 'wb') as out:
+        with open(
+            settings.MEDIA_ROOT_PATH / f"{file_name}_rois.pkl", "wb"
+        ) as out:
             pickle.dump(self.rois, out)
-        print('Result saved')
+        print("Result saved")
 
         return result_path
