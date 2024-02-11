@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import mixins
 from rest_framework.viewsets import ModelViewSet
 
-from django.db.models import Max
+from django.db.models import Max, Prefetch
 from django.db import connection, reset_queries
 from django.http import Http404
 
@@ -184,7 +184,7 @@ class PatientShotsTableView(ListAPIView):
             models.UZIImage.objects.select_related(
                 "uzi_device", "patient_card", "image"
             )
-            .prefetch_related("image__segments")  # TODO: ADD ORIGINAL IMAGE
+            .prefetch_related(Prefetch("image__segments", queryset=))  # TODO: ADD ORIGINAL IMAGE
             .filter(patient_card__patient__id=self.kwargs["id"])
         )
         return qs
