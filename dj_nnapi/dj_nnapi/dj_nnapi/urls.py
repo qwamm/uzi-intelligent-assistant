@@ -19,14 +19,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('predict/all/', views.PredictAll.as_view(), name='predict_all')
+    path("predict/all/", views.PredictAll.as_view(), name="predict_all")
 ]
 
 if settings.DEBUG:
-    #https://django-debug-toolbar.readthedocs.io/en/latest/installation.html
-    #https://drf-yasg.readthedocs.io/en/stable/readme.html
+    # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html
+    # https://drf-yasg.readthedocs.io/en/stable/readme.html
 
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(
+        settings.STATIC_URL, document_root=settings.STATIC_ROOT
+    )
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+    )
 
-    urlpatterns += [path('__debug__/', include('debug_toolbar.urls')),]
+    urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]
