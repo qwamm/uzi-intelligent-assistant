@@ -11,6 +11,7 @@ from django.utils.regex_helper import _lazy_re_compile
 from django.utils import timezone
 
 from medml import utils
+from medml.fields import DicomAndTiffFileField
 
 
 """Mixins"""
@@ -153,7 +154,7 @@ class OriginalImage(models.Model):
 
     viewed_flag = models.BooleanField("Просмотренно", default=False)
 
-    image = models.FileField(
+    image = DicomAndTiffFileField(
         "Cнимок", upload_to=utils.originalUZIPath, validators=[dcm_validator]
     )
 

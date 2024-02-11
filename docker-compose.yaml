@@ -78,6 +78,8 @@ services:
   redis_server:
     image: redis
     container_name: redis_server
+    ports:
+      - 8002:6379
 
   front_server:
     build: 

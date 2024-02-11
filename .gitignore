@@ -31,3 +31,6 @@ db/
 **/*.ipynb
 test.json
 react_frontend/
+.vscode
+poetry.lock
+pyproject.toml

@@ -189,7 +189,7 @@ class PatientShotsTableView(ListAPIView):
                     "image__segments",
                     queryset=models.UZISegmentGroupInfo.objects.all(),
                 )
-            )  # TODO: ADD ORIGINAL IMAGE
+            )
             .filter(patient_card__patient__id=self.kwargs["id"])
         )
         return qs

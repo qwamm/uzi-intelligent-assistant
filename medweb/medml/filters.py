@@ -47,10 +47,3 @@ class SegmentGroupFilter(filters.FilterSet):
     class Meta:
         model = models.UZISegmentGroupInfo
         fields = ["is_ai"]
-
-
-# class PatientShotsTableFilter(filters.filterSet):
-
-#     class Meta:
-#         model = models.UZIImage
-#         fields = ["is_ai"]

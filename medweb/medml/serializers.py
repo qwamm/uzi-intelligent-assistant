@@ -32,10 +32,13 @@ from django.db import transaction
 
 
 class RelativeURLMixin:
-    def to_representation(self, instance):
+    def to_representation(self, instance: OriginalImage):
         response = super(RelativeURLMixin, self).to_representation(instance)
         if instance.image:
-            response["image"] = instance.image.url
+            response["image"] = instance.image.tiff_file_url
+            response["image_original"] = instance.image.url
+            response["image_count"] = instance.image.pngs_len
+            response["slide_template"] = instance.image.slide_template
         return response
 
 
@@ -312,14 +315,14 @@ class UZIImageCreateSerializer(ser.ModelSerializer):
 
     def create(self, validated_data):
         image = validated_data.pop("original_image")
-        nimage, count = utils.in_mem_image_pre_saver(image)
+        # nimage, count = utils.in_mem_image_pre_saver(image)
         ssr = UZIForm(
             data={"projection_type": validated_data.pop("projection_type")}
         )  # TODO: CHANGE FORM
         ssr.is_valid(raise_exception=True)
         validated_data["details"] = ssr.validated_data
-        validated_data["image_count"] = count
-        originaImage = OriginalImage.objects.create(image=nimage)
+        # validated_data["image_count"] = count
+        originaImage = OriginalImage.objects.create(image=image)
         validated_data["image"] = originaImage
         uzi_image = super().create(validated_data)
         return {"uzi_image": uzi_image, "image": originaImage}
@@ -361,6 +364,10 @@ class UZIImageCreate2Serializer(ser.ModelSerializer):
 
 
 class UZIOriginalImageSerializer(RelativeURLMixin, ser.ModelSerializer):
+
+    def to_representation(self, instance):
+        return super().to_representation(instance)
+
     class Meta:
         model = OriginalImage
         fields = "__all__"
@@ -381,14 +388,12 @@ class UZIImageSupprotSerializer(ser.Serializer):
     UZI_DEV_PREFIX = "uzi_device_"
 
     def to_representation(self, obj: UZIImage):
-        sz = super().to_representation(
-            {
-                "patient": obj.patient_card.patient,
-                "uzi_device": obj.uzi_device,
-                "patient_card": obj.patient_card,
-                "image_group": obj,
-            }
-        )
+        sz = super().to_representation({
+            "patient": obj.patient_card.patient,
+            "uzi_device": obj.uzi_device,
+            "patient_card": obj.patient_card,
+            "image_group": obj,
+        })
         patient_card = sz.pop("patient_card")
         uzi_device = sz.pop("uzi_device")
         image_group = sz.pop("image_group")
