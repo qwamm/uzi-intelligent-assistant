@@ -24,5 +24,6 @@ RUN mkdir -p ${BASE_MODEL_FOLDER_PATH}
 # RUN mkdir /usr/src/web/static_files && mkdir /usr/src/web/static_files/map
 RUN pip install coreapi pyyaml imagecodecs
 ENV PYTHONUNBUFFERED=1
-COPY ./entrypoint.sh .
+COPY entrypoint.sh .
+COPY medweb/ /usr/src/web/server/
 ENTRYPOINT [ "./entrypoint.sh" ]
