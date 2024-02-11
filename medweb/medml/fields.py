@@ -15,11 +15,7 @@ class DicomAndTiffFileDescriptor(FileDescriptor):
         field: "DicomAndTiffFileField"
 
     def __set__(self, instance, value):
-        previous_file = instance.__dict__.get(self.field.attname)
         super().__set__(instance, value)
-
-        if previous_file is not None:
-            self.field.add_extra_paths(instance, force=True)
 
 
 class DicomAndTiffFile(FieldFile):
@@ -152,27 +148,3 @@ class DicomAndTiffFileField(FileField):
     @property
     def slide_name(self):
         return "%s{}%s" % (self.slide_name_prefix, self.slide_name_postfix)
-
-    def __init__(self, verbose_name=None, name=None, **kwargs):
-        self.tiff_file = ...
-        self.png_files = ...
-        self.pngs_len = ...
-        super().__init__(verbose_name, name, **kwargs)
-
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if self.tiff_file:
-            kwargs["tiff_file"] = self.tiff_file
-        if self.png_files:
-            kwargs["png_files"] = self.png_files
-        if self.png_files:
-            kwargs["pngs_len"] = self.pngs_len
-        return name, path, args, kwargs
-
-    def contribute_to_class(self, cls, name, **kwargs):
-        super().contribute_to_class(cls, name, **kwargs)
-        if not cls._meta.abstract:
-            signals.post_init.connect(self.add_extra_paths, sender=cls)
-
-    def add_extra_paths(self, instance, force=False, *args, **kwargs):
-        pass
