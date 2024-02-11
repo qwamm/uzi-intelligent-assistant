@@ -19,7 +19,6 @@ services:
         BASE_MODEL_FOLDER: base/
         BASE_MODEL_WEIGHTS: weights.pkl
     image: medml/web
-    entrypoint: ./entrypoint.sh
     container_name: web
     command: python ./medweb/manage.py runserver 0.0.0.0:8000
     ports:

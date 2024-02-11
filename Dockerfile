@@ -25,4 +25,4 @@ RUN mkdir -p ${BASE_MODEL_FOLDER_PATH}
 RUN pip install coreapi pyyaml imagecodecs
 ENV PYTHONUNBUFFERED=1
 COPY ./entrypoint.sh .
-# ENTRYPOINT [ "./entrypoint.sh" ]
+ENTRYPOINT [ "./entrypoint.sh" ]
