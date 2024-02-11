@@ -64,7 +64,7 @@ def in_mem_image_pre_saver(image):
     try:
       with image.open() as inp:
         t = tiff.imread(inp, squeeze=False)
-      tiff.imwrite(tmp, t, compression=tiff.COMPRESSION.NONE)
+      tiff.imwrite(tmp, t, compression=tiff.COMPRESSION.PNG)
       image.file = tmp
     except tiff.TiffFileError as e:
       raise AttributeError(f'Битый .tif файл. {e}')
@@ -76,10 +76,11 @@ def in_mem_image_pre_saver(image):
       with image.open() as inp:
         t = pydicom.dcmread(inp)
       img_size = t.pixel_array.shape[0]
-      tiff.imwrite(tmp, t.pixel_array, compression=tiff.COMPRESSION.NONE)
+      tiff.imwrite(tmp, t.pixel_array, compression=tiff.COMPRESSION.PNG)
       image.file = tmp
       image.name = fbase + '.tif'
-    except:
+    except Exception as e:
+      print(e)
       raise AttributeError(f'Битый .dcm файл.')
     return image, img_size
   return image, 1

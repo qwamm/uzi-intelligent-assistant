@@ -36,32 +36,32 @@ services:
       - ./medweb:/usr/src/web/medweb
       - ./media:/usr/src/web/media 
       - static_files:/usr/src/web/static_files/
-  djnnapi:
-    build: 
-      context: ./dj_nnapi
-      args: 
-        MEDIA_ROOT: /usr/src/web/media/
-    image: medml/dj_nnapi
-    entrypoint: ./entrypoint.sh
-    container_name: djnnapi
-    ports:
-      - 8008:8000
-    restart: always
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
-    env_file:
-      - ./dev.env
-    depends_on:
-      - db
-      - redis_server
-    volumes:
-      - ./dj_nnapi/dj_nnapi:/usr/src/web/dj_nnapi/dj_nnapi
-      - ./media:/usr/src/web/media 
-      # - static_files:/usr/src/web/static_files/
+  # djnnapi:
+  #   build: 
+  #     context: ./dj_nnapi
+  #     args: 
+  #       MEDIA_ROOT: /usr/src/web/media/
+  #   image: medml/dj_nnapi
+  #   entrypoint: ./entrypoint.sh
+  #   container_name: djnnapi
+  #   ports:
+  #     - 8008:8000
+  #   restart: always
+  #   # deploy:
+  #   #   resources:
+  #   #     reservations:
+  #   #       devices:
+  #   #         - driver: nvidia
+  #   #           capabilities: [gpu]
+  #   env_file:
+  #     - ./dev.env
+  #   depends_on:
+  #     - db
+  #     - redis_server
+  #   volumes:
+  #     - ./dj_nnapi/dj_nnapi:/usr/src/web/dj_nnapi/dj_nnapi
+  #     - ./media:/usr/src/web/media 
+  #     # - static_files:/usr/src/web/static_files/
   db:
     image: postgres
     restart: always
