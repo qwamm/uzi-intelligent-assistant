@@ -184,7 +184,12 @@ class PatientShotsTableView(ListAPIView):
             models.UZIImage.objects.select_related(
                 "uzi_device", "patient_card", "image"
             )
-            .prefetch_related(Prefetch("image__segments", queryset=))  # TODO: ADD ORIGINAL IMAGE
+            .prefetch_related(
+                Prefetch(
+                    "image__segments",
+                    queryset=models.UZISegmentGroupInfo.objects.all(),
+                )
+            )  # TODO: ADD ORIGINAL IMAGE
             .filter(patient_card__patient__id=self.kwargs["id"])
         )
         return qs
