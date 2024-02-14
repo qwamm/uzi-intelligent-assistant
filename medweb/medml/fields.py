@@ -28,6 +28,10 @@ class DicomAndTiffFile(FieldFile):
         return os.path.join(self.name, self.field.tiff_name)
 
     @property
+    def tiff_file_path(self):
+        return self.storage.path(self.tiff_file)
+
+    @property
     def tiff_file_url(self):
         return self.storage.url(self.tiff_file)
 

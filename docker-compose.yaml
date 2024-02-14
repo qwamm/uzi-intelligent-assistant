@@ -46,12 +46,12 @@ services:
     ports:
       - 8008:8000
     restart: always
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
     env_file:
       - ./dev.env
     depends_on:
@@ -63,7 +63,6 @@ services:
   db:
     image: postgres
     restart: always
-    container_name: db
     ports:
       - 8001:5432
     env_file:

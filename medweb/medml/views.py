@@ -235,7 +235,7 @@ class UZIImageCreateView(CreateAPIView):
         uzi_image: models.UZIImage = d["uzi_image"]
         original: models.OriginalImage = d["image"]
         tasks.predict_all.delay(
-            original.image.path,
+            original.image.tiff_file_path,
             projection_type=uzi_image.details.get("projection_type", "cross"),
             id=uzi_image.id,
         )
