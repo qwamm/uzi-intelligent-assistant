@@ -4,6 +4,7 @@ from typing import Iterable
 import numpy as np
 from PIL import Image
 import pydicom
+from tifffile import imread
 
 
 class ImgLoaderABC(ABC):
@@ -14,18 +15,22 @@ class ImgLoaderABC(ABC):
 
 class TiffLoader(ImgLoaderABC):
     def load(self, base_path: Path) -> Iterable:
-        images = []
-        image = Image.open(base_path)
-        i = 0
-        while True:
-            try:
-                image.seek(i)
-                image_array = np.array(image)
-                images.append(image_array)
-                i += 1
-            except EOFError:
-                break
-        return np.array(images)
+        try:
+            images = []
+            image = Image.open(base_path)
+            i = 0
+            while True:
+                try:
+                    image.seek(i)
+                    image_array = np.array(image)
+                    images.append(image_array)
+                    i += 1
+                except EOFError:
+                    break
+            return np.array(images)
+        except Exception as e:
+            print(str(e))
+            return imread(base_path)
 
 
 class PngLoader(ImgLoaderABC):
