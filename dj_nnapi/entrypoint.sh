@@ -8,8 +8,8 @@ done
 
 echo "Connected!"
 ls -la
-python ./dj_nnapi2/manage.py makemigrations nnmodel
-python ./dj_nnapi2/manage.py migrate nnmodel
+# python ./dj_nnapi2/manage.py makemigrations nnmodel
+# python ./dj_nnapi2/manage.py migrate nnmodel
 export wsgi_start=1
 cd ./dj_nnapi2
 python3 -m celery -A dj_nnapi worker -P solo -l info --without-heartbeat --concurrency=1
