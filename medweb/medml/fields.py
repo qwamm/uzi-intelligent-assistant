@@ -24,8 +24,7 @@ class DicomAndTiffFile(FieldFile):
 
     @property
     def tiff_file(self):
-        self._require_file()
-        return os.path.join(self.name, self.field.tiff_name)
+        return os.path.join(self.tiff_base, self.field.tiff_name)
 
     @property
     def tiff_file_path(self):
@@ -36,11 +35,14 @@ class DicomAndTiffFile(FieldFile):
         return self.storage.url(self.tiff_file)
 
     @property
-    def png_files(self):
+    def tiff_base(self):
         self._require_file()
         fbase, filee = os.path.splitext(self.name)
+        return fbase
 
-        return os.path.join(fbase, self.field.slides_dir)
+    @property
+    def png_files(self):
+        return os.path.join(self.tiff_base, self.field.slides_dir)
 
     @property
     def pngs_len(self):
