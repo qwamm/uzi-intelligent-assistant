@@ -22,6 +22,7 @@ def predict_all(file_path: str, projection_type: str, id: int):
     img = defaultImgLoader.load(file_path)
     seg_nodules = nn_seg.predict(img)
     ind, track = nn_cls.predict(nn_seg.rois, nn_seg.img_type)
+    print(f"{len(seg_nodules)=}")
 
     details = {}
     for key, val in track.items():
@@ -39,6 +40,7 @@ def predict_all(file_path: str, projection_type: str, id: int):
                         segment_group=details[idx], details=pre_details
                     )
                 )
+    print(f"{len(segments_data)=}")
     models.SegmentationData.objects.bulk_create(segments_data)
 
     segments_points = []
@@ -60,10 +62,11 @@ def predict_all(file_path: str, projection_type: str, id: int):
                         z=seg[2],
                     )
                 )
+    print(f"{len(segments_points)=}")
 
     models.SegmentationPoint.objects.bulk_create(
         segments_points, batch_size=2048
     )
     models.OriginalImage.objects.filter(id=id).update(viewed_flag=True)
     print("predicted!")
-    return k
+    return

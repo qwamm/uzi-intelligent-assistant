@@ -22,7 +22,7 @@ RUN echo "${BASE_MODEL_FOLDER_PATH}"
 RUN mkdir -p ${BASE_MODEL_FOLDER_PATH}
 
 # RUN mkdir /usr/src/web/static_files && mkdir /usr/src/web/static_files/map
-RUN pip install coreapi pyyaml imagecodecs
+RUN pip install coreapi pyyaml imagecodecs[all]
 ENV PYTHONUNBUFFERED=1
 COPY entrypoint.sh .
 COPY medweb/ /usr/src/web/server/

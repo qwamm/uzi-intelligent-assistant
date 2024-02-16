@@ -11,12 +11,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = getenv("SECRET_KEY")
+SECRET_KEY = getenv("SECRET_KEY", "COMMON_SECRET_SFDADS")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = getenv("DEBUG") == "1"
+DEBUG = getenv("DEBUG", "1") == "1"
+DEBUG = True
 
-ALLOWED_HOSTS = ["*"] + getenv("ALLOWED_HOSTS").split(";")
+ALLOWED_HOSTS = ["*"] + getenv("ALLOWED_HOSTS", "").split(";")
 
 
 # Application definition
@@ -72,12 +73,13 @@ WSGI_APPLICATION = "dj_nnapi.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": getenv("POSTGRES_DB"),
-        "USER": getenv("POSTGRES_USER"),
-        "PASSWORD": getenv("POSTGRES_PASSWORD"),
-        "HOST": getenv("SQL_HOST"),
-        "PORT": getenv("SQL_PORT"),
+        "ENGINE": "django_prometheus.db.backends.postgresql",
+        # 'ENGINE': 'django.db.backends.postgresql',
+        "NAME": getenv("POSTGRES_DB", "dev_db"),
+        "USER": getenv("POSTGRES_USER", "dev_user"),
+        "PASSWORD": getenv("POSTGRES_PASSWORD", "dev_password"),
+        "HOST": getenv("SQL_HOST", "localhost"),
+        "PORT": getenv("SQL_PORT", "8001"),
     }
 }
 
@@ -135,16 +137,18 @@ BASE_MODEL_PATH = MEDIA_ROOT_PATH / "nnModel"
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5)
-    if not DEBUG
-    else timedelta(hours=5),
+    "ACCESS_TOKEN_LIFETIME": (
+        timedelta(minutes=5) if not DEBUG else timedelta(hours=5)
+    ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 """CELERY"""
 # https://realpython.com/asynchronous-tasks-with-django-and-celery/
-CELERY_BROKER_URL = "redis://redis_server:6379"
-CELERY_RESULT_BACKEND = "redis://redis_server:6379"
+REDIS_HOST = getenv("REDIS_HOST", "redis_server")
+REDIS_PORT = getenv("REDIS_PORT", "6379")
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 
 
 """NNModel"""

@@ -20,6 +20,7 @@ ARG MEDIA_ROOT
 ENV MEDIA_ROOT=$MEDIA_ROOT
 
 ENV PYTHONUNBUFFERED=1
+RUN pip install imagecodecs[all]
 COPY entrypoint.sh entrypoint.sh
 COPY dj_nnapi/ dj_nnapi2/
 ENTRYPOINT [ "./entrypoint.sh" ]
