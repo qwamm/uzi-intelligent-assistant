@@ -117,7 +117,10 @@ class DicomAndTiffFile(FieldFile):
                 tifffile.imwrite(
                     out,
                     tiff_get,
-                    compression=tifffile.COMPRESSION.PNG,
+
+#                    photometric="rgb",
+#                    compression="zlib",
+#                    compression=tifffile.COMPRESSION.PNG,
                     compressionargs={"level": 9},
                 )
             return len(tiff_get)
