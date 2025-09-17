@@ -26,7 +26,7 @@ from skimage.transform import resize
 from pathlib import Path
 import numpy as np
 
-from nnmodel.nn.loaders.preloader import ModelPreLoaderABC, ZipModelPreLoader
+from ..loaders.preloader import ModelPreLoaderABC, ZipModelPreLoader
 
 
 class ResnetModel(ModelABC):

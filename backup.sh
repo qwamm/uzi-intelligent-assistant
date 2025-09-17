@@ -19,6 +19,16 @@ do
     # tar -cvf ${OPTARG}/$BACKUP_DIR/data.tar ./media/boxUZI ./media/originalUZI ./media/segUZI
     tar -cvf ${OPTARG}/$BACKUP_DIR/data.tar ./media/originalUZI
     echo "Backuped data - DONE"
+    PREV_YEAR=$(date -d "1 month ago" +'%Y')
+    PREV_MONTH=$(date -d "1 month ago" +'%m')
+    PREV_DIR="backups/${PREV_YEAR}/${PREV_MONTH}"
+    if [ -d "$PREV_DIR" ]; then
+      echo "Deleting backup folder for previous month: $PREV_DIR"
+      rm -rf "$PREV_DIR"
+      echo "Backup folder for previous month removed."
+    else
+      echo "No backup folder for previous month found."
+    fi
     ;;
     r) 
     # OPTARG = path to directory with backups withoup backups root (ex. 2023/02/01/19_55_32)

@@ -47,7 +47,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "dj_nnapi.urls"
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {
@@ -65,7 +65,7 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "dj_nnapi.wsgi.application"
+WSGI_APPLICATION = "wsgi.application"
 
 
 # Database
@@ -76,10 +76,10 @@ DATABASES = {
         "ENGINE": "django_prometheus.db.backends.postgresql",
         # 'ENGINE': 'django.db.backends.postgresql',
         "NAME": getenv("POSTGRES_DB", "dev_db"),
-        "USER": getenv("POSTGRES_USER", "dev_user"),
+        "USER": getenv("POSTGRES_USER", "postgres"),
         "PASSWORD": getenv("POSTGRES_PASSWORD", "dev_password"),
         "HOST": getenv("SQL_HOST", "localhost"),
-        "PORT": getenv("SQL_PORT", "8001"),
+        "PORT": getenv("SQL_PORT", "5432"),
     }
 }
 
@@ -145,11 +145,12 @@ SIMPLE_JWT = {
 
 """CELERY"""
 # https://realpython.com/asynchronous-tasks-with-django-and-celery/
-REDIS_HOST = getenv("REDIS_HOST", "redis_server")
-REDIS_PORT = getenv("REDIS_PORT", "6379")
-CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-
+#REDIS_HOST = getenv("REDIS_HOST", "redis_server")
+#REDIS_PORT = getenv("REDIS_PORT", "6379")
+#CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+#CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"
 
 """NNModel"""
 NN_SETTINGS = {

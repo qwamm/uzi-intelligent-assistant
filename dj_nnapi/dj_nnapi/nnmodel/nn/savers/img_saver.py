@@ -122,7 +122,7 @@ class ImgSaver(ImgSaverABC):
 
 
 if __name__ == "__main__":
-    from loaders.ImgLoader import ImgLoader
+    from ..loaders.img_loader import ImgLoader
 
     il = ImgLoader()
     bp = Path("./media/segUZI/2022/1/3510d999b0.png")

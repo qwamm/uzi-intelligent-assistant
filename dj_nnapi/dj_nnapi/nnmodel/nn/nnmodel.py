@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterable
 from pathlib import Path
-from nnmodel.nn.loaders.preloader import ModelPreLoaderABC, ZipModelPreLoader
+from .loaders.preloader import ModelPreLoaderABC, ZipModelPreLoader
 from django.conf import settings
 
 

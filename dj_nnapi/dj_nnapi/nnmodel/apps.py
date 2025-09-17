@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 from typing import *
-from nnmodel.nn.nnmodel import ModelABC
-from nnmodel.nn.models.SegmentationModel import SegmentationModel
-from nnmodel.nn.models.ClassificationModel import EfficientNetModel
+from .nn.nnmodel import ModelABC
+from .nn.models.SegmentationModel import SegmentationModel
+from .nn.models.ClassificationModel import EfficientNetModel
 from os import getenv
 
 

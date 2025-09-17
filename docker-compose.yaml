@@ -43,16 +43,16 @@ services:
     image: medml/dj_nnapi
     entrypoint: ./entrypoint.sh
     container_name: djnnapi
-    command: sleep 1000s
+#    command: sleep 1000s
     ports:
       - 8008:8000
     restart: always
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - driver: nvidia
+#              capabilities: [gpu]
     env_file:
       - ./dev.env
     depends_on:

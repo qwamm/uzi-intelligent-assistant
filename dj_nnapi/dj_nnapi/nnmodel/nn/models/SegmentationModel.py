@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 import segmentation_models_pytorch as smp
 
-from nnmodel.nn.nnmodel import ModelABC
-from nnmodel.nn.loaders.preloader import ModelPreLoaderABC, ZipModelPreLoader
+from ..nnmodel import ModelABC
+from ..loaders.preloader import ModelPreLoaderABC, ZipModelPreLoader
 from django.conf import settings
 
 

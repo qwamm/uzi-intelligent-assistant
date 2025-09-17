@@ -1,10 +1,10 @@
 from celery import shared_task
-from nnmodel import models
-from nnmodel.forms import segmetationDataForm, segmetationAiForm
+from . import models
+from .forms import segmetationDataForm, segmetationAiForm
 from django.conf import settings
 
-from nnmodel.nn.loaders.img_loader import defaultImgLoader
-from nnmodel.apps import NNmodelConfig
+from .nn.loaders.img_loader import defaultImgLoader
+from .apps import NNmodelConfig
 import cv2 as cv
 
 

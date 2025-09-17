@@ -1,4 +1,3 @@
-from nnmodel import models
 from rest_framework.serializers import ModelSerializer, Serializer
 import rest_framework.serializers as ser
 

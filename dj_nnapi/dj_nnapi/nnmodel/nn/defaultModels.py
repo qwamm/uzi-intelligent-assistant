@@ -1,6 +1,6 @@
-from nnmodel.nn.nnmodel import ModelABC
-from nnmodel.nn.models.SegmentationModel import SegmentationModel
-from nnmodel.nn.models.ClassificationModel import EfficientNetModel
+from .nnmodel import ModelABC
+from .models.SegmentationModel import SegmentationModel
+from .models.ClassificationModel import EfficientNetModel
 
 from typing import *
 from os import getenv

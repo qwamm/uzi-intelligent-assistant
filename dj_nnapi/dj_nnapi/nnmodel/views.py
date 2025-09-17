@@ -3,12 +3,12 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 from rest_framework.views import APIView
-from nnmodel import models
+from . import models
 
 
 # from nnmodel.nn.defaultModels import DefalutModels
-from nnmodel.apps import NNmodelConfig
-from nnmodel.nn.loaders.img_loader import defaultImgLoader
+from .apps import NNmodelConfig
+from .nn.loaders.img_loader import defaultImgLoader
 import cv2 as cv
 
 """SERIALIZERS"""
