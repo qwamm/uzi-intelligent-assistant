@@ -6,7 +6,6 @@ from django.db.models.fields.files import FieldFile, FileDescriptor
 import numpy
 import tifffile
 import pydicom
-from django.db.models import signals
 
 
 class DicomAndTiffFileDescriptor(FileDescriptor):

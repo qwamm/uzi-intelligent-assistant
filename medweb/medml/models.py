@@ -10,8 +10,8 @@ from django.core.validators import (
 from django.utils.regex_helper import _lazy_re_compile
 from django.utils import timezone
 
-from medml import utils
-from medml.fields import DicomAndTiffFileField
+import utils
+from .fields import DicomAndTiffFileField
 
 
 """Mixins"""

@@ -8,7 +8,6 @@ from rest_framework.generics import (
     UpdateAPIView,
     ListAPIView,
     RetrieveAPIView,
-    ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
@@ -16,13 +15,12 @@ from rest_framework import mixins
 from rest_framework.viewsets import ModelViewSet
 
 from django.db.models import Max, Prefetch
-from django.db import connection, reset_queries
 from django.http import Http404
 
-from medml import filters
-from medml import serializers as ser
-from medml import models
-from medml import tasks
+import filters
+import serializers as ser
+import models
+import tasks
 
 
 """MedWorkers' VIEWS"""

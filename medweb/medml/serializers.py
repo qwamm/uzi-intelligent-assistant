@@ -2,7 +2,7 @@
 from rest_framework import serializers as ser
 from django.core.validators import EmailValidator
 
-from medml.models import (
+from models import (
     MedWorker,
     Patient,
     PatientCard,
@@ -15,8 +15,8 @@ from medml.models import (
     MLModel,
     dcm_validator,
 )
-from medml import utils
-from medml.json_base.forms.UZIGroupForm import (
+import utils
+from json_base.forms.UZIGroupForm import (
     UZIFormUpdate,
     UZIForm,
     UZINullForm,

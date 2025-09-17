@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from inner_mail import models
+import models
 
 
 class NotificationDynamicsFilter(filters.FilterSet):

@@ -1,5 +1,4 @@
-from inner_mail import models
-from medml import models as med_models
+import models
 
 
 def get_details(details: dict):

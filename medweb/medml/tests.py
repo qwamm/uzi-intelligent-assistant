@@ -1,10 +1,8 @@
 from django.urls import reverse
-from rest_framework.test import force_authenticate
-from rest_framework.test import APIRequestFactory
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.test.testcases import SerializeMixin
-from medml import models
+import models
 
 
 class MedWorkerTestCaseMixin(SerializeMixin):

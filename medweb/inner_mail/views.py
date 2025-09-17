@@ -1,12 +1,10 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
-from django.contrib.auth.models import AnonymousUser
 
-from inner_mail import serializers as ser
-from inner_mail import models
-from inner_mail import filters
+import serializers as ser
+import models
+import filters
 
 from django.db import connection, reset_queries
 

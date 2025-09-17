@@ -4,7 +4,6 @@ import hashlib
 import os
 import tifffile as tiff
 import pydicom
-import io
 from tempfile import NamedTemporaryFile
 
 
