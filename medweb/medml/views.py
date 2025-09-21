@@ -17,10 +17,10 @@ from rest_framework.viewsets import ModelViewSet
 from django.db.models import Max, Prefetch
 from django.http import Http404
 
-import filters
-import serializers as ser
-import models
-import tasks
+from . import filters
+from . import serializers as ser
+from . import models
+from . import tasks
 
 
 """MedWorkers' VIEWS"""

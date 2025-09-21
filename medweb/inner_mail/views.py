@@ -2,11 +2,9 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 
-import serializers as ser
-import models
-import filters
-
-from django.db import connection, reset_queries
+from . import serializers as ser
+from . import models
+from . import filters
 
 # len(connection.queries) - кол-во запросов к бд
 

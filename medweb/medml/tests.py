@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.test.testcases import SerializeMixin
-import models
+from . import models
 
 
 class MedWorkerTestCaseMixin(SerializeMixin):

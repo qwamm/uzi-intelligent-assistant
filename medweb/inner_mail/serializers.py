@@ -1,7 +1,7 @@
 from rest_framework import serializers as ser
-import models
-from ..medml import models as med_models
-from ..medml import serializers as med_ser
+from . import models
+import medml.models as med_models
+import medml.serializers as med_ser
 from django.db.models import Q
 
 

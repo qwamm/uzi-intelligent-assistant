@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-import models
+from . import models
 
 from django.db.models import Value as V
 from django.db.models.functions import Concat

@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from ..medml import models as med_models
+import medml.models as med_models
 
 
 class MailType(models.IntegerChoices):

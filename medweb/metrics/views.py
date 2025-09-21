@@ -1,5 +1,5 @@
 from django.http import HttpRequest, HttpResponse
-from ..medml.models import OriginalImage
+from medml.models import OriginalImage
 
 
 def index(request: HttpRequest) -> HttpResponse:

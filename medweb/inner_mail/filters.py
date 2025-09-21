@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-import models
+from . import models
 
 
 class NotificationDynamicsFilter(filters.FilterSet):

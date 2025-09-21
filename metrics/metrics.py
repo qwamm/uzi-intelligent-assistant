@@ -4,7 +4,7 @@ import time
 import platform
 import socket
 import psutil
-from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+from prometheus_client import Gauge
 from prometheus_client import start_http_server, core
 from pynvml import *
 

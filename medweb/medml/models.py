@@ -10,7 +10,7 @@ from django.core.validators import (
 from django.utils.regex_helper import _lazy_re_compile
 from django.utils import timezone
 
-import utils
+from . import utils
 from .fields import DicomAndTiffFileField
 
 
