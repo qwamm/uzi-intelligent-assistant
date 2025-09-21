@@ -27,11 +27,45 @@ SECRET_KEY = getenv("SECRET_KEY", "COMMON_SECRET_SFDADS")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv("DEBUG", "1") == "1"
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"] + getenv("ALLOWED_HOSTS", "").split(";")
 
+# CORS_ALLOW_ALL_ORIGINS = True
+#
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173"
+]
 
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Разрешенные методы
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Для CSRF защиты
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -66,7 +100,7 @@ MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
-ROOT_URLCONF = "medweb.urls"
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -82,7 +116,7 @@ TEMPLATES = [{
     },
 }]
 
-WSGI_APPLICATION = "medweb.wsgi.application"
+WSGI_APPLICATION = "wsgi.application"
 
 
 # Database

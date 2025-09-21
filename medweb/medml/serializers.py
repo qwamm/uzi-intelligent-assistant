@@ -16,7 +16,7 @@ from .models import (
     dcm_validator,
 )
 from . import utils
-from medml.json_base.forms.UZIGroupForm import (
+from .json_base.forms.UZIGroupForm import (
     UZIFormUpdate,
     UZIForm,
     UZINullForm,
@@ -102,6 +102,7 @@ class MedWorkerRegistrationSerializer(ser.ModelSerializer):
         }
 
     def create(self, validated_data: dict):
+        print('HERE I AM')
         password1 = validated_data.pop("password1")
         password2 = validated_data.pop("password2")
         if password1 != password2:

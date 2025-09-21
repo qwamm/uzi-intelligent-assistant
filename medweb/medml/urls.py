@@ -2,13 +2,8 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from rest_framework import routers
 from django.urls import path, include
 from . import views
-
-router = routers.DefaultRouter()
-router.register("", views.PatientCardViewSet)
-
 
 urlpatterns = [
     path(
@@ -165,5 +160,4 @@ urlpatterns = [
             ]
         ),
     ),
-    path("card/", include(router.urls)),
 ]
