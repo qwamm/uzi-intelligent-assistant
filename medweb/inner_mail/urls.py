@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import views
+from inner_mail import views
 
 
 urlpatterns = [

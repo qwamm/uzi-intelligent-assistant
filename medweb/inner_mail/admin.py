@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from . import models
+from inner_mail import models
 
 
 @admin.register(models.MailDetails)

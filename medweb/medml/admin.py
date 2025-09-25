@@ -5,12 +5,12 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from django.contrib import admin
 from django.http import HttpResponse
 from django_use_email_as_username.admin import BaseUserAdmin
-from . import models
+from medml import models
 import hashlib
 
 from django.utils.translation import gettext_lazy as _
 
-from .serializers import (
+from medml.serializers import (
     UZISegmentationDataPointsSerializer,
     UZISegmentationGroupForm,
 )

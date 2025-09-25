@@ -1,4 +1,6 @@
+from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
+from django.db.models import Sum
 from medml.models import OriginalImage
 
 

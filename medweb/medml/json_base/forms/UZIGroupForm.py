@@ -1,6 +1,6 @@
 from rest_framework.serializers import Serializer, ModelSerializer
 from rest_framework import serializers as ser
-from ...models import UZIImage, SegmentationData, UZISegmentGroupInfo
+from medml.models import UZIImage, SegmentationData, UZISegmentGroupInfo
 
 
 class UZINullForm(Serializer):

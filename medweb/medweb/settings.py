@@ -9,15 +9,16 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-import sys
+
 from pathlib import Path
 from os import getenv
 from datetime import timedelta
+import django_prometheus
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -27,45 +28,11 @@ SECRET_KEY = getenv("SECRET_KEY", "COMMON_SECRET_SFDADS")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv("DEBUG", "1") == "1"
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"] + getenv("ALLOWED_HOSTS", "").split(";")
 
-# CORS_ALLOW_ALL_ORIGINS = True
-#
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173"
-]
 
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
-
-# Разрешенные методы
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-
-# Для CSRF защиты
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
 # Application definition
 
 INSTALLED_APPS = [
@@ -100,7 +67,7 @@ MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
-ROOT_URLCONF = "urls"
+ROOT_URLCONF = "medweb.urls"
 
 TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -116,7 +83,7 @@ TEMPLATES = [{
     },
 }]
 
-WSGI_APPLICATION = "wsgi.application"
+WSGI_APPLICATION = "medweb.wsgi.application"
 
 
 # Database
@@ -128,7 +95,7 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.postgresql',
         "NAME": getenv("POSTGRES_DB", "dev_db"),
         "USER": getenv("POSTGRES_USER", "postgres"),
-        "PASSWORD": getenv("POSTGRES_PASSWORD", "888"),
+        "PASSWORD": getenv("POSTGRES_PASSWORD", "dev_password"),
         "HOST": getenv("SQL_HOST", "localhost"),
         "PORT": getenv("SQL_PORT", "5432"),
     }
@@ -203,8 +170,8 @@ SIMPLE_JWT = {
 #REDIS_PORT = getenv("REDIS_PORT", "6379")
 #CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 #CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_BROKER_URL = "redis://localhost:6380"
+CELERY_RESULT_BACKEND = "redis://localhost:6380"
 
 """NNModel"""
 NN_SETTINGS = {

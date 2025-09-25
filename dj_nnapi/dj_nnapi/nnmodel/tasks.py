@@ -14,7 +14,7 @@ def createUziSegmentGroup(details, uzi_image_id, form=segmetationDataForm):
     )
 
 
-@shared_task(name="predict_all")
+@shared_task(name="predict_all", bind=True)
 def predict_all(file_path: str, projection_type: str, id: int):
     print(f"predictions, {projection_type=} {file_path=}")
     nn_cls = NNmodelConfig.DefalutModels["C"]["all"]

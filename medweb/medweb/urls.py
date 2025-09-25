@@ -1,22 +1,20 @@
-from rest_framework import routers
-from django.urls import path, include
 from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
 from django.conf.urls.static import static
-import settings
-import medml.views as views
 
-router = routers.DefaultRouter()
-router.register("", views.PatientCardViewSet)
+# import django_prometheus
 
 
 urlpatterns = [
-    path("card/", include(router.urls)),
     path("admin/", admin.site.urls),
     path("api/v3/", include("medml.urls")),
     path("api/v3/inner_mail/", include("inner_mail.urls")),
     path("api/v3/metrics/", include("metrics.urls")),
     path("api/prometheus/v1/", include("django_prometheus.urls")),
+    # path('', include('medweb_front.urls')),
 ]
+
 
 if settings.DEBUG:
     # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html

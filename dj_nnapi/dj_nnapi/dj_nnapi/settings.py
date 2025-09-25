@@ -149,8 +149,8 @@ SIMPLE_JWT = {
 #REDIS_PORT = getenv("REDIS_PORT", "6379")
 #CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 #CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_BROKER_URL = "redis://localhost:6380"
+CELERY_RESULT_BACKEND = "redis://localhost:6380"
 
 """NNModel"""
 NN_SETTINGS = {

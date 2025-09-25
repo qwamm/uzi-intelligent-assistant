@@ -17,11 +17,11 @@ from rest_framework.viewsets import ModelViewSet
 from django.db.models import Max, Prefetch
 from django.http import Http404
 
-from . import filters
-from . import serializers as ser
-from . import models
-from . import tasks
-from .models import MedWorker
+from medml import filters
+from medml import serializers as ser
+from medml import models
+from medml import tasks
+
 
 """MedWorkers' VIEWS"""
 
@@ -29,11 +29,6 @@ from .models import MedWorker
 class RegistrationView(CreateAPIView):
     serializer_class = ser.MedWorkerRegistrationSerializer
     permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        print(request.data)
-        print(MedWorker.objects.all())
-        return super().post(request, *args, **kwargs)
 
 
 class MedWorkerChangeView(mixins.RetrieveModelMixin, UpdateAPIView):
@@ -227,7 +222,6 @@ class UZIImageCreateView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         print(request.data["original_image"])
         serializer = self.get_serializer(data=request.data)
-        print(request.data)
         serializer.is_valid(raise_exception=True)
         data = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -238,7 +232,6 @@ class UZIImageCreateView(CreateAPIView):
 
         uzi_image: models.UZIImage = d["uzi_image"]
         original: models.OriginalImage = d["image"]
-        print("HERE I AM")
         tasks.predict_all.delay(
             original.image.tiff_file_path,
             projection_type=uzi_image.details.get("projection_type", "cross"),
