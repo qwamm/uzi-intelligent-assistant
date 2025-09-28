@@ -1,0 +1,145 @@
+#main-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#openseadragon {
+    height: 600px;
+    width: 1000px;
+    border: solid;
+    background-color: #ffffff;
+    border-width: 1px;
+    border-color: rgb(79, 179, 283);
+}
+.a9s-annotation.A .a9s-inner {
+    stroke-width:2px;
+    stroke:#00d0fa;
+    fill: rgba(13, 201, 240, 0.22);
+    -webkit-filter:drop-shadow(0 0 10px #00d0fa);
+    filter:drop-shadow(0 0 10px rgba(13, 201, 240, 0.74));
+}
+
+.a9s-annotation.A .a9s-inner:hover {
+    stroke-width:6px;
+    stroke:#00d0fa;
+    fill: rgba(13, 201, 240, 0.35);
+}
+.a9s-annotation.B .a9s-inner {
+    stroke-width:2px;
+    stroke: #00d995;
+    fill: rgba(0, 255, 179, 0.28);
+    -webkit-filter:drop-shadow(0 0 10px rgb(0, 217, 149));
+    filter:drop-shadow(0 0 10px rgb(0, 217, 149));
+}
+
+.a9s-annotation.B .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #00d995;
+    fill: rgba(103, 210, 181, 0.43);
+}
+.a9s-annotation.C .a9s-inner {
+    stroke-width:2px;
+    stroke: #00d995;
+    fill: rgba(14, 209, 145, 0.25);
+    -webkit-filter:drop-shadow(0 0 10px #00d995);
+    filter:drop-shadow(0 0 10px #00d995);
+}
+
+.a9s-annotation.C .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #00d995;
+    fill: rgba(14, 209, 145, 0.51);
+}
+.a9s-annotation.D .a9s-inner {
+    stroke-width:2px;
+    stroke: #ff6200;
+    fill: rgba(246, 96, 11, 0.25);
+    -webkit-filter:drop-shadow(0 0 10px rgb(228, 93, 24));
+    filter:drop-shadow(0 0 10px rgb(219, 92, 29));
+}
+
+.a9s-annotation.D .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #ff6200;;
+    fill: rgba(246, 96, 11, 0.51);
+}
+.a9s-annotation.E .a9s-inner {
+    stroke-width:2px;
+    stroke: #d9007b;
+    fill: rgba(217, 0, 123, 0.2);
+    -webkit-filter:drop-shadow(0 0 10px rgb(217, 0, 123));
+    filter:drop-shadow(0 0 10px rgb(217, 0, 123));
+}
+
+.a9s-annotation.E .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #d9007b;
+    fill: rgba(217, 0, 123, 0.47);
+}
+.a9s-annotation.DOC-A .a9s-inner {
+    stroke-width:2px;
+    stroke: #00d0fa;
+    fill: rgba(0, 217, 149, 0);
+    -webkit-filter:drop-shadow(0 0 10px rgb(13, 201, 240));
+    filter:drop-shadow(0 0 10px rgb(13, 201, 240));
+}
+
+.a9s-annotation.DOC-A .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #16c2e7;
+    fill: rgba(0, 217, 149, 0);
+}
+.a9s-annotation.DOC-B .a9s-inner {
+    stroke-width:2px;
+    stroke: #00d995;
+    fill: rgba(0, 217, 149, 0);
+    -webkit-filter:drop-shadow(0 0 10px rgb(0, 217, 149));
+    filter:drop-shadow(0 0 10px rgb(0, 217, 149));
+}
+
+.a9s-annotation.DOC-B .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #00d995;
+    fill: rgba(0, 217, 149, 0);
+}
+.a9s-annotation.DOC-C .a9s-inner {
+    stroke-width:2px;
+    stroke: #00d995;
+    fill: rgba(0, 217, 149, 0);
+    -webkit-filter:drop-shadow(0 0 10px rgb(0, 217, 149));
+    filter:drop-shadow(0 0 10px rgb(0, 217, 149));
+}
+
+.a9s-annotation.DOC-C .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #00d995;
+    fill: rgba(0, 217, 149, 0);
+}
+.a9s-annotation.DOC-D .a9s-inner {
+    stroke-width:3px;
+    stroke: #ff6200;
+    fill: rgba(0, 217, 149, 0);
+    -webkit-filter:drop-shadow(0 0 10px rgb(255, 94, 0));
+    filter:drop-shadow(0 0 10px rgb(255, 95, 0));
+}
+
+.a9s-annotation.DOC-D .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #ff5c00;
+    fill: rgba(0, 217, 149, 0);
+}
+
+.a9s-annotation.DOC-E .a9s-inner {
+    stroke-width:2px;
+    stroke: #d9007b;
+    fill: rgba(217, 0, 123, 0);
+    -webkit-filter:drop-shadow(0 0 10px rgb(217, 0, 123));
+    filter:drop-shadow(0 0 10px rgb(217, 0, 123));
+}
+
+.a9s-annotation.DOC-E .a9s-inner:hover {
+    stroke-width:6px;
+    stroke: #d9007b;
+    fill: rgba(0, 217, 149, 0);
+}
