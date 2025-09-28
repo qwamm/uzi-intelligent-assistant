@@ -23,7 +23,7 @@ class DicomAndTiffFile(FieldFile):
 
     @property
     def tiff_file(self):
-        return os.path.join(self.tiff_base, self.field.tiff_name)
+        return self.tiff_base + '/' + self.field.tiff_name
 
     @property
     def tiff_file_path(self):
@@ -41,7 +41,7 @@ class DicomAndTiffFile(FieldFile):
 
     @property
     def png_files(self):
-        return os.path.join(self.tiff_base, self.field.slides_dir)
+        return self.tiff_base + '/' + self.field.slides_dir
 
     @property
     def pngs_len(self):
@@ -56,9 +56,7 @@ class DicomAndTiffFile(FieldFile):
         )
 
     def get_png_by_index(self, idx: int):
-        return os.path.join(
-            self.png_files, self.field.slide_name.format(idx + 1)
-        )
+        return self.png_files + '/' + self.field.slide_name.format(idx + 1)
 
     def get_png_by_index_url(self, idx: int):
         return self.storage.url(self.get_png_by_index(idx))
@@ -66,7 +64,7 @@ class DicomAndTiffFile(FieldFile):
     def _prepare_file(self, name: str, content: IO):
         content.seek(0)
         fbase, filee = os.path.splitext(name)
-        slides_dir = os.path.join(fbase, self.field.slides_dir)
+        slides_dir = fbase + '/' + self.field.slides_dir
         os.makedirs(slides_dir, 0o777, exist_ok=True)
         return fbase, filee.lower(), slides_dir
 
@@ -75,9 +73,7 @@ class DicomAndTiffFile(FieldFile):
         try:
             tiff_desc, get_tiff = self._get_tiff(filee, content)
             for idx, slide in enumerate(get_tiff):
-                slide_name = os.path.join(
-                    slides_dir, self.field.slide_name.format(idx + 1)
-                )
+                slide_name = slides_dir + '/' + self.field.slide_name.format(idx + 1)
                 with open(slide_name, "wb") as out:
                     with Image.fromarray(slide) as img:
                         img.save(out)
@@ -112,7 +108,7 @@ class DicomAndTiffFile(FieldFile):
         try:
             tiff_descr, tiff_get = self._get_tiff(filee, content)
 
-            with open(os.path.join(fbase, self.field.tiff_name), "wb") as out:
+            with open(fbase + '/' + self.field.tiff_name, "wb") as out:
                 tifffile.imwrite(
                     out,
                     tiff_get,

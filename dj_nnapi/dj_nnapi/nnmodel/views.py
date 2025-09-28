@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 from rest_framework.views import APIView
-from . import models
+from . import models, tasks
 
 
 # from nnmodel.nn.defaultModels import DefalutModels
@@ -67,7 +67,7 @@ class PredictAll(APIView):
     def post(self, request: Request, *args, **kwargs):
         ser = self.serializer_class(data=request.data)
         ser.is_valid(raise_exception=True)
-        k = self.predict(
+        k = tasks.predict_all(
             ser.validated_data["file_path"],
             ser.validated_data["projection_type"],
             ser.validated_data["id"],
@@ -75,62 +75,3 @@ class PredictAll(APIView):
         return Response(
             data={"text": "predicted", "k": k}, status=status.HTTP_201_CREATED
         )
-
-    def predict(self, file_path: str, projection_type: str, id: int):
-        print(f"predictions, {projection_type=} {file_path=}")
-        nn_cls = NNmodelConfig.DefalutModels["C"]["all"]  # projection_type
-        nn_seg = NNmodelConfig.DefalutModels["S"][projection_type]
-        img = defaultImgLoader.load(file_path)
-        nn_mask = nn_seg.predict(img)
-        ind, track = nn_cls.predict(nn_seg.rois, nn_seg.img_type)
-        segments_data = []
-        pre_details = {}
-        for ni in ind:
-            for nj in ni:
-                pre_details = segmetationDataForm(nj)
-                segments_data.append(
-                    models.SegmentationData(
-                        original_image_id=id, details=pre_details
-                    )
-                )
-
-        models.SegmentationData.objects.bulk_create(segments_data)
-
-        details = (
-            pre_details
-            if track is None
-            else segmetationDataForm(list(track.values())[0])
-        )
-        uzi_img = models.OriginalImage.objects.get(id=id).uzi_image
-        uzi_img.details = details
-        uzi_img.save()
-
-        segments_points = []
-        k = 0
-        for j, mask_img in enumerate(nn_mask):
-            c, h = cv.findContours(
-                mask_img,
-                cv.RETR_TREE,
-                cv.CHAIN_APPROX_SIMPLE | cv.CHAIN_APPROX_TC89_L1,
-            )
-            # print(c, h)
-            if h is not None:
-                cc = [c[i] for i in range(h.shape[1]) if h[0][i][3] == -1]
-                for counter in cc:
-                    for i, pi in enumerate(counter):
-                        segments_points.append(
-                            models.SegmentationPoint(
-                                uid=i,
-                                segment=segments_data[k],
-                                x=pi[0, 0],
-                                y=pi[0, 1],
-                                z=j,
-                            )
-                        )
-                    k += 1
-        models.SegmentationPoint.objects.bulk_create(
-            segments_points, batch_size=2048
-        )
-
-        print("predicted!")
-        return k

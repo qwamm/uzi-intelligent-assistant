@@ -32,6 +32,7 @@ def _makePath(obj, filename: str, basedir: str):
     ]
     if filee in {".jpeg", ".jpg"}:
         filee = ".png"
+    print(f"{basedir}/{date.today().year}/{h}{filee}")
     return f"{basedir}/{date.today().year}/{h}{filee}"
 
 

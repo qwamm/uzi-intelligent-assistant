@@ -15,6 +15,12 @@ urlpatterns = [
     # path('', include('medweb_front.urls')),
 ]
 
+urlpatterns += static(
+    settings.STATIC_URL, document_root=settings.STATIC_ROOT
+)
+urlpatterns += static(
+    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+)
 
 if settings.DEBUG:
     # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html
@@ -33,12 +39,6 @@ if settings.DEBUG:
         ),
         public=True,
         permission_classes=[permissions.AllowAny],
-    )
-    urlpatterns += static(
-        settings.STATIC_URL, document_root=settings.STATIC_ROOT
-    )
-    urlpatterns += static(
-        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
     )
 
     urlpatterns += [

@@ -1,72 +1,157 @@
-from celery import shared_task
 from . import models
-from .forms import segmetationDataForm, segmetationAiForm
-from django.conf import settings
 
 from .nn.loaders.img_loader import defaultImgLoader
+from .nn.datasets.ThyroidUltrasoundDataset import ThyroidUltrasoundDataset
+from .forms import segmetationDataForm
 from .apps import NNmodelConfig
-import cv2 as cv
-
+import cv2
+import numpy as np
 
 def createUziSegmentGroup(details, uzi_image_id, form=segmetationDataForm):
     return models.UZISegmentGroupInfo(
-        details=form(details), is_ai=True, original_image_id=uzi_image_id
+        details=details, is_ai=True, original_image_id=uzi_image_id
     )
 
-
-@shared_task(name="predict_all", bind=True)
 def predict_all(file_path: str, projection_type: str, id: int):
     print(f"predictions, {projection_type=} {file_path=}")
-    nn_cls = NNmodelConfig.DefalutModels["C"]["all"]
-    nn_seg = NNmodelConfig.DefalutModels["S"][projection_type]
+    roi_classification_model = NNmodelConfig.DefalutModels["C"]["all"]
+    roi_segmentation_model = NNmodelConfig.DefalutModels["S"]["all"]
+    detector_tracker = NNmodelConfig.DefalutModels["D"]["all"]
     img = defaultImgLoader.load(file_path)
-    seg_nodules = nn_seg.predict(img)
-    ind, track = nn_cls.predict(nn_seg.rois, nn_seg.img_type)
-    print(f"{len(seg_nodules)=}")
+    dataset = ThyroidUltrasoundDataset(path=file_path)
+    detection_results, detected_nodules, rois_in_frames = detector_tracker.predict(
+        dataset=dataset,
+        image_size=640,
+        batch_size=1,
+        conf_det=0.5,
+        iou=0.3,
+        roi_margin_percent=10,
+        save=False,
+    )
+
+    rois_in_frames, result_masks = roi_segmentation_model.predict(
+        nodules=detected_nodules,
+        rois_in_frames=rois_in_frames,
+        batch_size=8,
+        image_size=256,
+        threshold=0.5,
+        initial_image_height=dataset.initial_height,
+        initial_image_width=dataset.initial_width,
+        crop_coordinates=dataset.crop_coordinates,
+        save=True,
+        result_dir='segmentation_results'
+    )
+
+    nodule_class_dict = roi_classification_model.predict(
+        nodules=detected_nodules,
+        image_size=224
+    )
+
+    match nodule_class_dict[0]:
+        case 'TIRADS1':
+            nodule_type = 1
+        case 'TIRADS2':
+            nodule_type = 2
+        case 'TIRADS3':
+            nodule_type = 3
+        case 'TIRADS3':
+            nodule_type = 4
+        case 'TIRADS5':
+            nodule_type = 5
+        case _:
+            nodule_type = -1
+
+    nodule_2_3 = 1 if nodule_type == 2 or nodule_type == 3 else 0
+    nodule_4 = 1 if nodule_type == 4 else 0
+    nodule_5 = 1 if nodule_type == 5 else 0
 
     details = {}
-    for key, val in track.items():
-        details[key] = createUziSegmentGroup(val, id)
+    pre_details = {'nodule_type': nodule_type, 'nodule_2_3': nodule_2_3, 'nodule_4': nodule_4, 'nodule_5': nodule_5}
 
+    details[0] = createUziSegmentGroup(pre_details, id)
     models.UZISegmentGroupInfo.objects.bulk_create(details.values())
 
-    segments_data = []
-    for ni in ind:
-        for idx, nj in ni.items():
-            for nj2 in nj:
-                pre_details = segmetationDataForm(nj2, True)
-                segments_data.append(
-                    models.SegmentationData(
-                        segment_group=details[idx], details=pre_details
-                    )
-                )
-    print(f"{len(segments_data)=}")
-    models.SegmentationData.objects.bulk_create(segments_data)
+    print("DETECTED NODULES", detected_nodules, sep='\n')
+    print('ROIS IN FRAMES', rois_in_frames, sep='\n')
+    print("RESULT MASKS", result_masks, sep='\n')
+
+    # segments_data = []
+    # for ni in rois_in_frames:
+    #     for idx, nj in ni.items():
+    #         for nj2 in nj:
+    #             pre_details = segmetationDataForm(nj2, True)
+    #             segments_data.append(
+    #                 models.SegmentationData(
+    #                     segment_group=details[idx], details=pre_details
+    #                 )
+    #             )
+    # print(f"{len(segments_data)=}")
+    # segments_data.append(
+    #         models.SegmentationData(
+    #             segment_group=details[0], details=pre_details
+    #         )
+    # )
+    # models.SegmentationData.objects.bulk_create(segments_data)
+    # Создание записи SegmentationData
+    segmentation_data_obj = models.SegmentationData(
+        segment_group=details[0],
+        details=pre_details
+    )
+    segmentation_data_obj.save()
 
     segments_points = []
-    for k, seg in enumerate(seg_nodules):
-        c, h = cv.findContours(
-            seg[0],
-            cv.RETR_TREE,
-            cv.CHAIN_APPROX_SIMPLE | cv.CHAIN_APPROX_TC89_L1,
+    # Проходим по всем маскам результатов
+    for mask_idx, result_mask in enumerate(result_masks):
+        if result_mask is None or np.sum(result_mask) == 0:
+            print(f"Mask {mask_idx} is empty, skipping...")
+            continue
+
+        print(f"Processing mask {mask_idx} with shape {result_mask.shape}")
+
+        # Преобразуем маску в uint8 для OpenCV
+        binary_mask = (result_mask * 255).astype(np.uint8)
+
+        # Находим контуры
+        contours, hierarchy = cv2.findContours(
+            binary_mask,
+            cv2.RETR_TREE,
+            cv2.CHAIN_APPROX_SIMPLE | cv2.CHAIN_APPROX_TC89_L1,
         )
-        if h is not None:
-            counter = [c[i] for i in range(h.shape[1]) if h[0][i][3] == -1][0]
-            for i, pi in enumerate(counter):
+
+        print(f"Found {len(contours)} contours in mask {mask_idx}")
+
+        # Обрабатываем найденные контуры
+        for contour_idx, contour in enumerate(contours):
+            print(f"Contour {contour_idx} has {len(contour)} points")
+
+            # Создаем точки для каждого контура
+            for point_idx, point in enumerate(contour):
+                # point имеет форму [[x, y]]
+                x = point[0][0]
+                y = point[0][1]
+
                 segments_points.append(
                     models.SegmentationPoint(
-                        uid=i,
-                        segment=segments_data[k],
-                        x=pi[0, 0],
-                        y=pi[0, 1],
-                        z=seg[2],
+                        uid=point_idx,  # Уникальный ID в пределах контура
+                        segment=segmentation_data_obj,
+                        x=x,
+                        y=y,
+                        z=mask_idx,  # Используем mask_idx как координату Z
                     )
                 )
-    print(f"{len(segments_points)=}")
 
-    models.SegmentationPoint.objects.bulk_create(
-        segments_points, batch_size=2048
-    )
+    print(f"Total points to create: {len(segments_points)}")
+
+    # Сохраняем точки сегментации батчами
+    if segments_points:
+        batch_size = 1000
+        for i in range(0, len(segments_points), batch_size):
+            batch = segments_points[i:i + batch_size]
+            models.SegmentationPoint.objects.bulk_create(batch)
+        print(f"Successfully created {len(segments_points)} segmentation points")
+    else:
+        print("No segmentation points to create")
+
     models.OriginalImage.objects.filter(id=id).update(viewed_flag=True)
     print("predicted!")
     return

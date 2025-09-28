@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework import routers
 from django.urls import path, include
+
 from medml import views
 
 router = routers.DefaultRouter()

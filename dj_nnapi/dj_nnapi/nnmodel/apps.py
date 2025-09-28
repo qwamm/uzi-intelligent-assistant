@@ -1,8 +1,9 @@
 from django.apps import AppConfig
 from typing import *
 from .nn.nnmodel import ModelABC
-from .nn.models.SegmentationModel import SegmentationModel
-from .nn.models.ClassificationModel import EfficientNetModel
+from .nn.models.DetectionTrackingModel import DetectionTrackingModel
+from .nn.models.ROISegmentationModel import ROISegmentationModel
+from .nn.models.ROIClassificationModel import ROIClassificationModel
 from os import getenv
 
 
@@ -14,13 +15,8 @@ class NNmodelConfig(AppConfig):
 
     wsgi = int(getenv("wsgi_start", "0"))
 
-    if wsgi:
-        DefalutModels: Dict[str, Dict[str, ModelABC]] = {
-            "C": {"all": EfficientNetModel(MODEL_DIR["C"], "all")},
-            "S": {
-                "cross": SegmentationModel(MODEL_DIR["S"], "cross"),
-                "long": SegmentationModel(MODEL_DIR["S"], "long"),
-            },
-        }
-    else:
-        DefalutModels = {}
+    DefalutModels: Dict[str, Dict[str, ModelABC]] = {
+            "D": {"all": DetectionTrackingModel(model_type='all')},
+            "C": {"all": ROIClassificationModel(model_type='all')},
+            "S": {"all": ROISegmentationModel(model_type='all')}
+    }
