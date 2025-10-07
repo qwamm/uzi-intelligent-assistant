@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_use_email_as_username.models import BaseUser, BaseUserManager
@@ -178,6 +180,7 @@ class SegmentationData(models.Model):
 
 
 class SegmentationPoint(models.Model):
+    #uid = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
     uid = models.BigIntegerField()
 
     segment = models.ForeignKey(

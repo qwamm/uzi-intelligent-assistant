@@ -1,3 +1,5 @@
+import uuid
+
 from . import models
 
 from .nn.loaders.img_loader import defaultImgLoader
@@ -12,42 +14,8 @@ def createUziSegmentGroup(details, uzi_image_id, form=segmetationDataForm):
         details=details, is_ai=True, original_image_id=uzi_image_id
     )
 
-def predict_all(file_path: str, projection_type: str, id: int):
-    print(f"predictions, {projection_type=} {file_path=}")
-    roi_classification_model = NNmodelConfig.DefalutModels["C"]["all"]
-    roi_segmentation_model = NNmodelConfig.DefalutModels["S"]["all"]
-    detector_tracker = NNmodelConfig.DefalutModels["D"]["all"]
-    img = defaultImgLoader.load(file_path)
-    dataset = ThyroidUltrasoundDataset(path=file_path)
-    detection_results, detected_nodules, rois_in_frames = detector_tracker.predict(
-        dataset=dataset,
-        image_size=640,
-        batch_size=1,
-        conf_det=0.5,
-        iou=0.3,
-        roi_margin_percent=10,
-        save=False,
-    )
-
-    rois_in_frames, result_masks = roi_segmentation_model.predict(
-        nodules=detected_nodules,
-        rois_in_frames=rois_in_frames,
-        batch_size=8,
-        image_size=256,
-        threshold=0.5,
-        initial_image_height=dataset.initial_height,
-        initial_image_width=dataset.initial_width,
-        crop_coordinates=dataset.crop_coordinates,
-        save=True,
-        result_dir='segmentation_results'
-    )
-
-    nodule_class_dict = roi_classification_model.predict(
-        nodules=detected_nodules,
-        image_size=224
-    )
-
-    match nodule_class_dict[0]:
+def createSegmentationDataObj(ind, nodule, details, image_id, result_masks):
+    match nodule:
         case 'TIRADS1':
             nodule_type = 1
         case 'TIRADS2':
@@ -65,40 +33,18 @@ def predict_all(file_path: str, projection_type: str, id: int):
     nodule_4 = 1 if nodule_type == 4 else 0
     nodule_5 = 1 if nodule_type == 5 else 0
 
-    details = {}
     pre_details = {'nodule_type': nodule_type, 'nodule_2_3': nodule_2_3, 'nodule_4': nodule_4, 'nodule_5': nodule_5}
 
-    details[0] = createUziSegmentGroup(pre_details, id)
-    models.UZISegmentGroupInfo.objects.bulk_create(details.values())
-
-    print("DETECTED NODULES", detected_nodules, sep='\n')
-    print('ROIS IN FRAMES', rois_in_frames, sep='\n')
-    print("RESULT MASKS", result_masks, sep='\n')
-
-    # segments_data = []
-    # for ni in rois_in_frames:
-    #     for idx, nj in ni.items():
-    #         for nj2 in nj:
-    #             pre_details = segmetationDataForm(nj2, True)
-    #             segments_data.append(
-    #                 models.SegmentationData(
-    #                     segment_group=details[idx], details=pre_details
-    #                 )
-    #             )
-    # print(f"{len(segments_data)=}")
-    # segments_data.append(
-    #         models.SegmentationData(
-    #             segment_group=details[0], details=pre_details
-    #         )
-    # )
-    # models.SegmentationData.objects.bulk_create(segments_data)
-    # Создание записи SegmentationData
+    details[ind] = createUziSegmentGroup(pre_details, image_id)
+    models.UZISegmentGroupInfo.objects.bulk_create([details[ind]])
     segmentation_data_obj = models.SegmentationData(
-        segment_group=details[0],
+        segment_group=details[ind],
         details=pre_details
     )
     segmentation_data_obj.save()
+    createSegmentationPointObj(result_masks, segmentation_data_obj)
 
+def createSegmentationPointObj(result_masks, segmentation_data_obj):
     segments_points = []
     # Проходим по всем маскам результатов
     for mask_idx, result_mask in enumerate(result_masks):
@@ -132,11 +78,11 @@ def predict_all(file_path: str, projection_type: str, id: int):
 
                 segments_points.append(
                     models.SegmentationPoint(
-                        uid=point_idx,  # Уникальный ID в пределах контура
+                        uid=hash(uuid.uuid4()),
                         segment=segmentation_data_obj,
                         x=x,
                         y=y,
-                        z=mask_idx,  # Используем mask_idx как координату Z
+                        z=mask_idx,
                     )
                 )
 
@@ -151,6 +97,76 @@ def predict_all(file_path: str, projection_type: str, id: int):
         print(f"Successfully created {len(segments_points)} segmentation points")
     else:
         print("No segmentation points to create")
+
+def predict_all(file_path: str, projection_type: str, id: int):
+    print(f"predictions, {projection_type=} {file_path=}")
+    roi_classification_model = NNmodelConfig.DefalutModels["C"]["all"]
+    roi_segmentation_model = NNmodelConfig.DefalutModels["S"]["all"]
+    detector_tracker = NNmodelConfig.DefalutModels["D"]["all"]
+    dataset = ThyroidUltrasoundDataset(path=file_path)
+    detection_results, detected_nodules, rois_in_frames = detector_tracker.predict(
+        dataset=dataset,
+        image_size=640,
+        batch_size=1,
+        conf_det=0.5,
+        iou=0.3,
+        roi_margin_percent=10,
+        save=False,
+    )
+
+    rois_in_frames, result_masks = roi_segmentation_model.predict(
+        nodules=detected_nodules,
+        rois_in_frames=rois_in_frames,
+        batch_size=8,
+        image_size=256,
+        threshold=0.5,
+        initial_image_height=dataset.initial_height,
+        initial_image_width=dataset.initial_width,
+        crop_coordinates=dataset.crop_coordinates,
+        save=False
+    )
+
+    nodule_class_dict = roi_classification_model.predict(
+        nodules=detected_nodules,
+        image_size=224
+    )
+
+    details = {}
+
+    if isinstance(nodule_class_dict, dict):
+        nodule_class_dict = dict(nodule_class_dict)
+        for ind, nodule in nodule_class_dict.items():
+            createSegmentationDataObj(ind, nodule, details, id, result_masks)
+    elif isinstance(nodule_class_dict, str):
+        createSegmentationDataObj(0, nodule_class_dict, details, id, result_masks)
+    else:
+        raise TypeError("Unexpected type in nodule_class_dict")
+
+
+    #models.UZISegmentGroupInfo.objects.bulk_create(details.values())
+
+    #print("DETECTED NODULES", detected_nodules, sep='\n')
+    #print('ROIS IN FRAMES', rois_in_frames, sep='\n')
+    #print("RESULT MASKS", result_masks, sep='\n')
+
+    # segments_data = []
+    # for ni in rois_in_frames:
+    #     for idx, nj in ni.items():
+    #         for nj2 in nj:
+    #             pre_details = segmetationDataForm(nj2, True)
+    #             segments_data.append(
+    #                 models.SegmentationData(
+    #                     segment_group=details[idx], details=pre_details
+    #                 )
+    #             )
+    # print(f"{len(segments_data)=}")
+    # segments_data.append(
+    #         models.SegmentationData(
+    #             segment_group=details[0], details=pre_details
+    #         )
+    # )
+    # models.SegmentationData.objects.bulk_create(segments_data)
+    # Создание записи SegmentationData
 
     models.OriginalImage.objects.filter(id=id).update(viewed_flag=True)
     print("predicted!")

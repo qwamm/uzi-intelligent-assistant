@@ -12,7 +12,7 @@ def predict_all(file_path: str, projection_type: str, id: int):
     }
     print(file_path)
     try:
-        response = requests.post(api_url, json=payload, timeout=30)
+        response = requests.post(api_url, json=payload, timeout=3000)
         print(f"Status Code: {response.status_code}")
         print(f"Response Headers: {response.headers}")
 
