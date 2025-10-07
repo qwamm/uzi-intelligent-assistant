@@ -1,0 +1,3 @@
+[submodule "ct-intelligent-assistant-front"]
+	path = ct-intelligent-assistant-front
+	url = https://github.com/qwamm/ct-intelligent-assistant-front
