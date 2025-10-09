@@ -1,9 +1,18 @@
 import requests
+import dramatiq
+from dramatiq.brokers.redis import RedisBroker
+from dramatiq.results import Results
+from dramatiq.results.backends.redis import RedisBackend
 
+result_backend = RedisBackend(host="localhost", port=6380)
+redis_broker = RedisBroker(host="localhost", port=6380)
+redis_broker.add_middleware(Results(backend=result_backend))
+dramatiq.set_broker(redis_broker)
 
+@dramatiq.actor(store_results=True)
 def predict_all(file_path: str, projection_type: str, id: int):
-    NEURAL_API_URL = 'http://127.0.0.1:80'
-    api_url = f"{NEURAL_API_URL}/predict/all/"  # http://localhost:8001/api/predict/
+    NN_API_URL = 'http://127.0.0.1:80'
+    api_url = f"{NN_API_URL}/predict/all/"
     file_path = file_path.replace('\\', '/')
     payload = {
         'file_path': file_path,
