@@ -2,14 +2,12 @@ import requests
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 from dramatiq.results import Results
-from dramatiq.results.backends.redis import RedisBackend
+from dramatiq.brokers.rabbitmq import RabbitmqBroker
 
-result_backend = RedisBackend(host="localhost", port=6380)
-redis_broker = RedisBroker(host="localhost", port=6380)
-redis_broker.add_middleware(Results(backend=result_backend))
-dramatiq.set_broker(redis_broker)
+broker = RabbitmqBroker(host="localhost", port=6380, heartbeat=5)
+dramatiq.set_broker(broker)
 
-@dramatiq.actor(store_results=True)
+@dramatiq.actor
 def predict_all(file_path: str, projection_type: str, id: int):
     NN_API_URL = 'http://127.0.0.1:80'
     api_url = f"{NN_API_URL}/predict/all/"
