@@ -23,10 +23,12 @@ from medml.json_base.forms.UZIGroupForm import (
     UZISegmentationGroupForm,
 )
 
-from django.db.models import F, Value, JSONField, Func
+from django.db.models import F, Value, JSONField
 from django.db.models.expressions import CombinedExpression
 from django.forms.models import model_to_dict
 from django.db import transaction
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 """MIXINS"""
 
@@ -73,6 +75,7 @@ class MedWorkerRegistrationSerializer(ser.ModelSerializer):
         write_only=True,
         required=True,
         style={"input_type": "password", "placeholder": "Пароль"},
+        validators=[validate_password]
     )
 
     password2 = ser.CharField(
@@ -100,11 +103,22 @@ class MedWorkerRegistrationSerializer(ser.ModelSerializer):
             "med_organization": {"required": True},
         }
 
+    def validate(self, attrs):
+        """Дополнительная валидация паролей"""
+        password1 = attrs.get('password1')
+        password2 = attrs.get('password2')
+
+        if password1 != password2:
+            raise ValidationError({"password2": "Пароли должны совпадать"})
+
+        if len(password1) < 8:
+            raise ValidationError({"password1": "Пароль должен содержать минимум 8 символов"})
+
+        return attrs
+
     def create(self, validated_data: dict):
         password1 = validated_data.pop("password1")
         password2 = validated_data.pop("password2")
-        if password1 != password2:
-            raise ValueError("Пароли должны совпадать")
         user: MedWorker = MedWorker.objects.create_user(
             **validated_data, password=password1
         )

@@ -4,7 +4,7 @@ from dramatiq.brokers.redis import RedisBroker
 from dramatiq.results import Results
 from dramatiq.brokers.rabbitmq import RabbitmqBroker
 
-broker = RabbitmqBroker(host="localhost", port=6380, heartbeat=5)
+broker = RabbitmqBroker(host="localhost", port=5672, heartbeat=5)
 dramatiq.set_broker(broker)
 
 @dramatiq.actor

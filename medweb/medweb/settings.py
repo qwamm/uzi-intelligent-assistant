@@ -40,6 +40,24 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,  # минимальная длина пароля
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -87,8 +105,6 @@ TEMPLATES = [{
         ]
     },
 }]
-
-WSGI_APPLICATION = "medweb.wsgi.application"
 
 
 # Database
@@ -175,8 +191,8 @@ SIMPLE_JWT = {
 #REDIS_PORT = getenv("REDIS_PORT", "6379")
 #CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 #CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-CELERY_BROKER_URL = "redis://localhost:6380"
-CELERY_RESULT_BACKEND = "redis://localhost:6380"
+#CELERY_BROKER_URL = "redis://localhost:6380"
+#CELERY_RESULT_BACKEND = "redis://localhost:6380"
 
 """NNModel"""
 NN_SETTINGS = {
