@@ -2,7 +2,6 @@ import uuid
 
 from . import models
 
-from .nn.loaders.img_loader import defaultImgLoader
 from .nn.datasets.ThyroidUltrasoundDataset import ThyroidUltrasoundDataset
 from .forms import segmetationDataForm
 from .apps import NNmodelConfig
