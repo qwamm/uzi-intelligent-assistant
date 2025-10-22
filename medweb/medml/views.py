@@ -1,7 +1,7 @@
 import json
 
 import concurrent.futures
-from asgiref.sync import sync_to_async
+from dramatiq.results.backends.redis import RedisBackend
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.permissions import AllowAny
@@ -24,7 +24,6 @@ from medml import filters
 from medml import serializers as ser
 from medml import models
 from medml import tasks
-from medml.tasks import result_backend
 
 """MedWorkers' VIEWS"""
 
@@ -237,12 +236,14 @@ class UZIImageCreateView(CreateAPIView):
 
         uzi_image: models.UZIImage = d["uzi_image"]
         original: models.OriginalImage = d["image"]
-        task = tasks.predict_all.send(
+        task = tasks.send_prediction_task(
             original.image.tiff_file_path,
             uzi_image.details.get("projection_type", "cross"),
             uzi_image.id,
         )
-        result = result_backend.get_result(message=task, block = True, timeout = 300000)
+        #result_backend = RedisBackend(host='localhost', port=6380)
+        print("TASK TYPE ", type(task), sep = ' ')
+        #result = result_backend.get_result(message=task, block=True, timeout=100000)
         return {"image_id": uzi_image.id}
 
 

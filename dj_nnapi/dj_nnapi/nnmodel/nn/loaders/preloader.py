@@ -32,5 +32,4 @@ class ZipModelPreLoader(ModelPreLoaderABC):
             self.tmp_dir.mkdir(parents=True, exist_ok=True)
             zip_ref.extractall(self.tmp_dir)
 
-        print(self.tmp_dir)
         return self.tmp_dir

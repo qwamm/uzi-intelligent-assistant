@@ -129,4 +129,3 @@ if __name__ == "__main__":
     a = il.load(bp)
     iS = ImgSaver()
     np = iS.save(a, "S", bp)
-    print(np)

@@ -29,7 +29,6 @@ class TiffLoader(ImgLoaderABC):
                     break
             return np.array(images)
         except Exception as e:
-            print(str(e))
             return imread(base_path)
 
 

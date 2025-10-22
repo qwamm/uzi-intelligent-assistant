@@ -1,10 +1,12 @@
 import uuid
 
-from . import models
+import dramatiq
+from django.db import transaction
+from nnmodel import models
 
-from .nn.datasets.ThyroidUltrasoundDataset import ThyroidUltrasoundDataset
-from .forms import segmetationDataForm
-from .apps import NNmodelConfig
+from nnmodel.nn.datasets.ThyroidUltrasoundDataset import ThyroidUltrasoundDataset
+from nnmodel.forms import segmetationDataForm
+from nnmodel.apps import NNmodelConfig
 import cv2
 import numpy as np
 
@@ -21,7 +23,7 @@ def createSegmentationDataObj(ind, nodule, details, image_id, result_masks):
             nodule_type = 2
         case 'TIRADS3':
             nodule_type = 3
-        case 'TIRADS3':
+        case 'TIRADS4':
             nodule_type = 4
         case 'TIRADS5':
             nodule_type = 5
@@ -97,11 +99,13 @@ def createSegmentationPointObj(result_masks, segmentation_data_obj):
     else:
         print("No segmentation points to create")
 
+@dramatiq.actor(queue_name='predict_all', store_results=True)
 def predict_all(file_path: str, projection_type: str, id: int):
     print(f"predictions, {projection_type=} {file_path=}")
     roi_classification_model = NNmodelConfig.DefalutModels["C"]["all"]
     roi_segmentation_model = NNmodelConfig.DefalutModels["S"]["all"]
     detector_tracker = NNmodelConfig.DefalutModels["D"]["all"]
+
     dataset = ThyroidUltrasoundDataset(path=file_path)
     detection_results, detected_nodules, rois_in_frames = detector_tracker.predict(
         dataset=dataset,
@@ -140,32 +144,6 @@ def predict_all(file_path: str, projection_type: str, id: int):
         createSegmentationDataObj(0, nodule_class_dict, details, id, result_masks)
     else:
         raise TypeError("Unexpected type in nodule_class_dict")
-
-
-    #models.UZISegmentGroupInfo.objects.bulk_create(details.values())
-
-    #print("DETECTED NODULES", detected_nodules, sep='\n')
-    #print('ROIS IN FRAMES', rois_in_frames, sep='\n')
-    #print("RESULT MASKS", result_masks, sep='\n')
-
-    # segments_data = []
-    # for ni in rois_in_frames:
-    #     for idx, nj in ni.items():
-    #         for nj2 in nj:
-    #             pre_details = segmetationDataForm(nj2, True)
-    #             segments_data.append(
-    #                 models.SegmentationData(
-    #                     segment_group=details[idx], details=pre_details
-    #                 )
-    #             )
-    # print(f"{len(segments_data)=}")
-    # segments_data.append(
-    #         models.SegmentationData(
-    #             segment_group=details[0], details=pre_details
-    #         )
-    # )
-    # models.SegmentationData.objects.bulk_create(segments_data)
-    # Создание записи SegmentationData
 
     models.OriginalImage.objects.filter(id=id).update(viewed_flag=True)
     print("predicted!")

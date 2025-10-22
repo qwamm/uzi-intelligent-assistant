@@ -49,12 +49,8 @@ class ROIClassificationModel(ModelABC):
         self._cv_models = []
         self._ml_models = []
         for p in cv_model_paths:
-            print(p)
-            print("Текущий рабочий каталог:", os.getcwd())
             self._cv_models.append(YOLO(p))
         for p in ml_model_paths:
-            print(p)
-            print("Текущий рабочий каталог:", os.getcwd())
             self._ml_models.append(joblib.load(p))
 
     def preprocessing(self) -> None:
