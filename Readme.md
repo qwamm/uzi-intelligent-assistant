@@ -11,7 +11,7 @@
 #### Предварительные действия:
   - Установить клиент pgAdmin(если его нет) и создать БД с именем dev_db, работующую на сокете  ```localhost:5432 ```
 
-#### Запуск компонентов:
+#### Запуск компонентов(все команды, кроме последней, выполняются из корня проекта):
    ```bash
    pip install -r requirements.txt
    python medweb/manage.py makemigrations medml
@@ -21,7 +21,6 @@
    python dj_nnapi/dj_nnapi/manage.py migrate
    python medweb/manage.py base_configuration # скрипт для первичного заполнения БД данными об УЗИ аппаратах и аккаунте администратора
    python medweb/manage.py runserver #запуск основного сервера, работающего на порте 8000
-   python dj_nnapi/dj_nnapi/manage.py runserver 127.0.0.1:80 #запуск внешнего REST сервера, реализующего апи для работы с моделями
+   сd dj_nnapi/dj_nnapi
+   python manage.py rundramatiq --processes 1 --threads 1 -v 2 --queues predict_all #запуск внешнего REST сервера, реализующего апи для работы с моделями через daranatiq
    ```
-
-  P.S. Запускать сервера нужно обязательно из корневой папки проекта для корректной работы приложения
