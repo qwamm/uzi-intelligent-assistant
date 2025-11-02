@@ -15,4 +15,4 @@ def send_prediction_task(file_path: str, projection_type: str, image_id: int):
     )
 
     broker.enqueue(message)
-    return message.message_id
+    return message
