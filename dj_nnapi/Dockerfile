@@ -10,9 +10,6 @@ RUN apt-get install netcat -y
 
 # RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 
-COPY ./config/nnreq.txt ./nnreq.txt
-RUN pip install -r ./nnreq.txt
-
 COPY ./config/requirements.txt .
 RUN pip install -r ./requirements.txt
 
@@ -22,6 +19,6 @@ ENV MEDIA_ROOT=$MEDIA_ROOT
 ENV PYTHONUNBUFFERED=1
 RUN pip install imagecodecs[all]
 COPY entrypoint.sh entrypoint.sh
-COPY dj_nnapi/ dj_nnapi2/
+COPY dj_nnapi/ dj_nnapi/
 ENTRYPOINT [ "./entrypoint.sh" ]
 

@@ -22,9 +22,6 @@ else
   echo "MIGRATION MEDML!"
   python manage.py makemigrations inner_mail
   echo "MIGRATION inner_mail!"
-  python manage.py migrate auth
-  python manage.py migrate medml
-  python manage.py migrate inner_mail
   python manage.py migrate
 
   python manage.py base_configuration

@@ -212,7 +212,7 @@ NN_SETTINGS = {
 if DEBUG:
     INSTALLED_APPS += ["drf_yasg", "debug_toolbar"]
     CORS_ALLOW_ALL_ORIGINS = True
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:49118"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
     REST_FRAMEWORK = {
         "DEFAULT_RENDERER_CLASSES": [
             "rest_framework.renderers.JSONRenderer",

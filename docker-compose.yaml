@@ -75,8 +75,14 @@ services:
   redis:
     image: redis
     container_name: redis
-    #ports:
-    #  - 8002:6379
+    ports:
+      - "8002:6380"
+
+  rabbitmq:
+    image: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "8003:5672"
 
   front_server:
     build: 
