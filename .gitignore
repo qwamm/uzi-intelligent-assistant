@@ -45,7 +45,7 @@ pyproject.toml
 
 # production
 /build
-/dist
+/react_frontend
 /out
 
 # misc

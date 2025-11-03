@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ct-intelligent-assistant-front" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/uzi-intelligent-assistant-front" vcs="Git" />
   </component>
 </project>
