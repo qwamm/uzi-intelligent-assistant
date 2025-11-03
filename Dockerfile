@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11
 WORKDIR /usr/src/web
 
 RUN apt-get update && apt-get install netcat-traditional -y

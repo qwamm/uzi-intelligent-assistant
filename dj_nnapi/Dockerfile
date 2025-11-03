@@ -1,16 +1,13 @@
-FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
+FROM python:3.11
 WORKDIR /usr/src/web/dj_nnapi
 
-RUN python -m pip install --upgrade pip
-# RUN rm /etc/apt/sources.list.d/cuda.list
-# RUN rm /etc/apt/sources.list.d/nvidia-ml.list
-RUN apt-get update
+RUN apt-get update && apt-get install netcat-traditional -y
 RUN apt-get install ffmpeg libsm6 libxext6  -y
-RUN apt-get install netcat -y
+RUN python -m pip install --upgrade pip
 
 # RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 
-COPY ./config/requirements.txt .
+COPY ./requirements.txt .
 RUN pip install -r ./requirements.txt
 
 ARG MEDIA_ROOT
