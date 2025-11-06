@@ -138,6 +138,10 @@ def predict_all(file_path: str, projection_type: str, id: int):
 
     if isinstance(nodule_class_dict, dict):
         nodule_class_dict = dict(nodule_class_dict)
+        print("NODULE_CLASS_DICT")
+        print(nodule_class_dict)
+        print("RESULT_MASKS LEN")
+        print(len(result_masks))
         for ind, nodule in nodule_class_dict.items():
             createSegmentationDataObj(ind, nodule, details, id, result_masks)
     elif isinstance(nodule_class_dict, str):
