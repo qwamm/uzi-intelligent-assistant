@@ -242,7 +242,6 @@ class UZIImageCreateView(CreateAPIView):
             uzi_image.id,
         )
         result_backend = RedisBackend(host='localhost', port=6380)
-        print("TASK TYPE ", type(task), sep = ' ')
         result = result_backend.get_result(message=task, block=True, timeout=1000000)
         return {"image_id": uzi_image.id}
 
