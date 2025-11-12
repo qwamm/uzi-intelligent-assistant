@@ -1,7 +1,6 @@
 import uuid
 
 import dramatiq
-from django.db import transaction
 from nnmodel import models
 
 from nnmodel.nn.datasets.ThyroidUltrasoundDataset import ThyroidUltrasoundDataset
@@ -134,13 +133,6 @@ def predict_all(file_path: str, projection_type: str, id: int):
     )
 
     details = {}
-
-    print("IMAGE ID")
-    print(id)
-    print("NODULE_CLASS_DICT")
-    print(nodule_class_dict)
-    print("RESULT_MASKS LEN")
-    print(len(result_masks))
 
     if isinstance(nodule_class_dict, dict):
         for ind, nodule in nodule_class_dict.items():
