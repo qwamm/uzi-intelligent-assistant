@@ -47,43 +47,44 @@ def createSegmentationDataObj(ind, nodule, details, image_id, result_masks):
 def createSegmentationPointObj(result_masks, segmentation_data_obj):
     segments_points = []
     # Проходим по всем маскам результатов
-    for mask_idx, result_mask in enumerate(result_masks):
-        if result_mask is None or np.sum(result_mask) == 0:
-            print(f"Mask {mask_idx} is empty, skipping...")
-            continue
+    for result_mask_dict in result_masks:
+        for mask_idx, result_mask in result_mask_dict.items():
+            if result_mask is None or np.sum(result_mask) == 0:
+                print(f"Mask {mask_idx} is empty, skipping...")
+                continue
 
-        print(f"Processing mask {mask_idx} with shape {result_mask.shape}")
+            print(f"Processing mask {mask_idx} with shape {result_mask.shape}")
 
-        # Преобразуем маску в uint8 для OpenCV
-        binary_mask = (result_mask * 255).astype(np.uint8)
+            # Преобразуем маску в uint8 для OpenCV
+            binary_mask = (result_mask * 255).astype(np.uint8)
 
-        # Находим контуры
-        contours, hierarchy = cv2.findContours(
-            binary_mask,
-            cv2.RETR_TREE,
-            cv2.CHAIN_APPROX_SIMPLE | cv2.CHAIN_APPROX_TC89_L1,
-        )
+            # Находим контуры
+            contours, hierarchy = cv2.findContours(
+                binary_mask,
+                cv2.RETR_TREE,
+                cv2.CHAIN_APPROX_SIMPLE | cv2.CHAIN_APPROX_TC89_L1,
+            )
 
-        print(f"Found {len(contours)} contours in mask {mask_idx}")
+            print(f"Found {len(contours)} contours in mask {mask_idx}")
 
-        # Обрабатываем найденные контуры
-        for contour_idx, contour in enumerate(contours):
-            print(f"Contour {contour_idx} has {len(contour)} points")
+            # Обрабатываем найденные контуры
+            for contour_idx, contour in enumerate(contours):
+                print(f"Contour {contour_idx} has {len(contour)} points")
 
-            # Создаем точки для каждого контура
-            for point_idx, point in enumerate(contour):
-                x = point[0][0]
-                y = point[0][1]
+                # Создаем точки для каждого контура
+                for point_idx, point in enumerate(contour):
+                    x = point[0][0]
+                    y = point[0][1]
 
-                segments_points.append(
-                    models.SegmentationPoint(
-                        uid=hash(uuid.uuid4()),
-                        segment=segmentation_data_obj,
-                        x=x,
-                        y=y,
-                        z=mask_idx,
+                    segments_points.append(
+                        models.SegmentationPoint(
+                            uid=hash(uuid.uuid4()),
+                            segment=segmentation_data_obj,
+                            x=x,
+                            y=y,
+                            z=mask_idx,
+                        )
                     )
-                )
 
     print(f"Total points to create: {len(segments_points)}")
 
@@ -96,6 +97,14 @@ def createSegmentationPointObj(result_masks, segmentation_data_obj):
         print(f"Successfully created {len(segments_points)} segmentation points")
     else:
         print("No segmentation points to create")
+
+def get_result_masks_for_nodule(rois_in_frames, nodule_ind):
+    res = []
+    for mask_ind, roi in enumerate(rois_in_frames):
+        for nodule in roi:
+            if nodule[1] == nodule_ind:
+                res.append({mask_ind : nodule[2]})
+    return res
 
 @dramatiq.actor(queue_name='predict_all', store_results=True)
 def predict_all(file_path: str, projection_type: str, id: int):
@@ -136,7 +145,8 @@ def predict_all(file_path: str, projection_type: str, id: int):
 
     if isinstance(nodule_class_dict, dict):
         for ind, nodule in nodule_class_dict.items():
-            createSegmentationDataObj(ind, nodule, details, id, result_masks)
+            result_masks_with_cur_nodule = get_result_masks_for_nodule(rois_in_frames, ind)
+            createSegmentationDataObj(ind, nodule, details, id, result_masks_with_cur_nodule)
     elif isinstance(nodule_class_dict, str):
         createSegmentationDataObj(0, nodule_class_dict, details, id, result_masks)
     else:
