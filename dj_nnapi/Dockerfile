@@ -5,8 +5,6 @@ RUN apt-get update && apt-get install netcat-traditional -y
 RUN apt-get install ffmpeg libsm6 libxext6  -y
 RUN python -m pip install --upgrade pip
 
-# RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
-
 COPY ./requirements.txt .
 RUN pip install -r ./requirements.txt
 

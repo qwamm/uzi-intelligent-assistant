@@ -98,8 +98,6 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "dj_nnapi.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -175,15 +173,6 @@ SIMPLE_JWT = {
     ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
-
-"""CELERY"""
-# https://realpython.com/asynchronous-tasks-with-django-and-celery/
-#REDIS_HOST = getenv("REDIS_HOST", "redis_server")
-#REDIS_PORT = getenv("REDIS_PORT", "6379")
-#CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-#CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-CELERY_BROKER_URL = "redis://localhost:6380"
-CELERY_RESULT_BACKEND = "redis://localhost:6380"
 
 """NNModel"""
 NN_SETTINGS = {
