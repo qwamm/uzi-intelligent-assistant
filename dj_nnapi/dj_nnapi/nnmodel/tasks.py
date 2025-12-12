@@ -4,12 +4,85 @@ import dramatiq
 from nnmodel import models
 
 from nnmodel.nn.datasets.ThyroidUltrasoundDataset import ThyroidUltrasoundDataset
-from nnmodel.forms import segmetationDataForm
 from nnmodel.apps import NNmodelConfig
 import cv2
+
 import numpy as np
 
-def createUziSegmentGroup(details, uzi_image_id, form=segmetationDataForm):
+
+# def calculate_and_save_nodule_dimensions(segmentation_data_obj, result_masks, pixel_size_mm=0.1):
+#     """
+#     Вычисляет размеры узла щитовидной железы на основе сегментационных данных
+#     и сохраняет их в объект Nodule.
+#
+#     :param segmentation_data_obj: Объект SegmentationData с информацией о сегментации
+#     :param result_masks: Список масок сегментации узла
+#     :param pixel_size_mm: Размер пикселя в миллиметрах (по умолчанию 0.1 мм)
+#                          Это значение должно быть калибровано для конкретного оборудования
+#     """
+#
+#     all_points = []
+#     z_values = set()
+#
+#     for result_mask_dict in result_masks:
+#         for mask_idx, result_mask in result_mask_dict.items():
+#             if result_mask is None or np.sum(result_mask) == 0:
+#                 continue
+#
+#             y_coords, x_coords = np.where(result_mask > 0)
+#
+#             z_coords = np.full_like(x_coords, mask_idx)
+#
+#             for x, y, z in zip(x_coords, y_coords, z_coords):
+#                 all_points.append([x, y, z])
+#                 z_values.add(z)
+#
+#     if not all_points:
+#         print("No segmentation points found for nodule")
+#         return None
+#
+#     points_array = np.array(all_points)
+#
+#     if len(points_array) > 0:
+#         min_x, min_y, min_z = np.min(points_array, axis=0)
+#         max_x, max_y, max_z = np.max(points_array, axis=0)
+#
+#         length_px = max_x - min_x
+#         width_px = max_y - min_y
+#         thickness_px = max_z - min_z
+#
+#         length_mm = length_px * pixel_size_mm
+#         width_mm = width_px * pixel_size_mm
+#         thickness_mm = (thickness_px + 1) * pixel_size_mm
+#
+#         volume_mm3 = (4 / 3) * np.pi * (length_mm / 2) * (width_mm / 2) * (thickness_mm / 2)
+#
+#         try:
+#             thyroid_gland = models.ThyroidGland.objects.filter(uzi_segment_group=segmentation_data_obj.segment_group).first()
+#
+#             nodule = models.Nodule(
+#                 thyroid_gland=thyroid_gland,
+#                 length=length_mm,
+#                 width=width_mm,
+#                 thickness=thickness_mm,
+#                 location="",
+#                 contour=""
+#             )
+#
+#             nodule.save()
+#
+#             print(f"Nodule created: length={length_mm:.2f}mm, width={width_mm:.2f}mm, "
+#                   f"thickness={thickness_mm:.2f}mm, volume={volume_mm3:.2f}mm³")
+#
+#             return nodule
+#
+#         except Exception as e:
+#             print(f"Error creating Nodule object: {e}")
+#             return None
+#
+#     return None
+
+def createUziSegmentGroup(details, uzi_image_id):
     return models.UZISegmentGroupInfo(
         details=details, is_ai=True, original_image_id=uzi_image_id
     )
@@ -44,9 +117,10 @@ def createSegmentationDataObj(ind, nodule, details, image_id, result_masks):
     segmentation_data_obj.save()
     createSegmentationPointObj(result_masks, segmentation_data_obj)
 
+    #calculate_and_save_nodule_dimensions(segmentation_data_obj, result_masks)
+
 def createSegmentationPointObj(result_masks, segmentation_data_obj):
     segments_points = []
-    # Проходим по всем маскам результатов
     for result_mask_dict in result_masks:
         for mask_idx, result_mask in result_mask_dict.items():
             if result_mask is None or np.sum(result_mask) == 0:
@@ -55,10 +129,8 @@ def createSegmentationPointObj(result_masks, segmentation_data_obj):
 
             print(f"Processing mask {mask_idx} with shape {result_mask.shape}")
 
-            # Преобразуем маску в uint8 для OpenCV
             binary_mask = (result_mask * 255).astype(np.uint8)
 
-            # Находим контуры
             contours, hierarchy = cv2.findContours(
                 binary_mask,
                 cv2.RETR_TREE,
@@ -99,6 +171,11 @@ def createSegmentationPointObj(result_masks, segmentation_data_obj):
         print("No segmentation points to create")
 
 def get_result_masks_for_nodule(rois_in_frames, nodule_ind):
+    """
+    Получение результирующих масок для данного узла
+    :param rois_in_frames - регионы интереса для каждого слайда
+    :param nodule_ind - id узла
+    """
     res = []
     for mask_ind, roi in enumerate(rois_in_frames):
         for nodule in roi:
@@ -148,7 +225,8 @@ def predict_all(file_path: str, projection_type: str, id: int):
             result_masks_with_cur_nodule = get_result_masks_for_nodule(rois_in_frames, ind)
             createSegmentationDataObj(ind, nodule, details, id, result_masks_with_cur_nodule)
     elif isinstance(nodule_class_dict, str):
-        createSegmentationDataObj(0, nodule_class_dict, details, id, result_masks)
+        result_masks_with_cur_nodule = get_result_masks_for_nodule(rois_in_frames, 0)
+        createSegmentationDataObj(0, nodule_class_dict, details, id, result_masks_with_cur_nodule)
     else:
         raise TypeError("Unexpected type in nodule_class_dict")
 

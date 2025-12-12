@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 settings = {
-    'detection': {'all': 'media/nnModel/detectUZI/all/epoch93_P0,843_R0,741.pt'},
+    'detection': {'all': 'media/nnModel/detectUZI/all/epoch74_P88,4_R72,8.pt'},
     'segmentation': {'all': 'media/nnModel/segUZI/all/Unet-timm-efficientnet-b7_dice-0.950.pt'},
     'classification': {
         'all':
